@@ -58,7 +58,7 @@ public class DisassemblyTests {
 		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_B2.value).putInt(0);
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("8fc71e8300000000"));
 		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_B3.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_RET.value).putShort(FunctionCode.CHECK_HASH160_A_WITH_B.value).putInt(1);
+		codeByteBuffer.put(OpCode.EXT_FUN_RET.value).putShort(FunctionCode.CHECK_RMD160_A_WITH_B.value).putInt(1);
 		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.ECHO.value).putInt(1);
 		codeByteBuffer.put(OpCode.FIN_IMD.value);
 

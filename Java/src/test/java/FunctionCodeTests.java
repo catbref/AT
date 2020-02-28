@@ -1,6 +1,8 @@
 import static common.TestUtils.hexToBytes;
 import static org.junit.Assert.*;
 
+import java.nio.charset.StandardCharsets;
+
 import org.ciyam.at.ExecutionException;
 import org.ciyam.at.FunctionCode;
 import org.ciyam.at.OpCode;
@@ -11,178 +13,49 @@ import common.ExecutableTest;
 
 public class FunctionCodeTests extends ExecutableTest {
 
+	private static final String message = "The quick, brown fox jumped over the lazy dog.";
+	private static final byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
+
+	private static final FunctionCode[] bSettingFunctions = new FunctionCode[] { FunctionCode.SET_B1, FunctionCode.SET_B2, FunctionCode.SET_B3, FunctionCode.SET_B4 };
+
 	@Test
 	public void testMD5() throws ExecutionException {
-		// MD5 of ffffffffffffffffffffffffffffffff is 8d79cbc9a4ecdde112fc91ba625b13c2
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("ffffffffffffffff"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A1.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A2.value).putInt(0);
-		// A3 unused
-		// A4 unused
-
-		codeByteBuffer.put(OpCode.EXT_FUN.value).putShort(FunctionCode.MD5_A_TO_B.value);
-
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("8d79cbc9a4ecdde1"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A1.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("12fc91ba625b13c2"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A2.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("0000000000000000"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A3.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("0000000000000000"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A4.value).putInt(0);
-
-		codeByteBuffer.put(OpCode.EXT_FUN_RET.value).putShort(FunctionCode.CHECK_A_EQUALS_B.value).putInt(1);
-
-		codeByteBuffer.put(OpCode.FIN_IMD.value);
-
-		execute(true);
-
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
-		assertEquals("MD5 hashes do not match", 1L, getData(1));
+		testHash("MD5", FunctionCode.MD5_A_TO_B, FunctionCode.CHECK_A_EQUALS_B, "1388a82384756096e627e3671e2624bf");
 	}
 
 	@Test
 	public void testCHECK_MD5() throws ExecutionException {
-		// MD5 of ffffffffffffffffffffffffffffffff is 8d79cbc9a4ecdde112fc91ba625b13c2
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("ffffffffffffffff"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A1.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A2.value).putInt(0);
-		// A3 unused
-		// A4 unused
-
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("8d79cbc9a4ecdde1"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_B1.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("12fc91ba625b13c2"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_B2.value).putInt(0);
-
-		codeByteBuffer.put(OpCode.EXT_FUN_RET.value).putShort(FunctionCode.CHECK_MD5_A_WITH_B.value).putInt(1);
-
-		codeByteBuffer.put(OpCode.FIN_IMD.value);
-
-		execute(true);
-
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
-		assertEquals("MD5 hashes do not match", 1L, getData(1));
+		testHash("MD5", null, FunctionCode.CHECK_MD5_A_WITH_B, "1388a82384756096e627e3671e2624bf");
 	}
 
 	@Test
-	public void testHASH160() throws ExecutionException {
-		// RIPEMD160 of ffffffffffffffffffffffffffffffffffffffffffffffff is 90e735014ea23aa89190121b229c06d58fc71e83
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("ffffffffffffffff"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A1.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A2.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A3.value).putInt(0);
-		// A4 unused
-
-		codeByteBuffer.put(OpCode.EXT_FUN.value).putShort(FunctionCode.HASH160_A_TO_B.value);
-
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("90e735014ea23aa8"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A1.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("9190121b229c06d5"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A2.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("8fc71e8300000000"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A3.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("0000000000000000"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A4.value).putInt(0);
-
-		codeByteBuffer.put(OpCode.EXT_FUN_RET.value).putShort(FunctionCode.CHECK_A_EQUALS_B.value).putInt(1);
-
-		codeByteBuffer.put(OpCode.FIN_IMD.value);
-
-		execute(true);
-
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
-		assertEquals("RIPEMD160 hashes do not match", 1L, getData(1));
+	public void testRMD160() throws ExecutionException {
+		testHash("RIPE-MD160", FunctionCode.RMD160_A_TO_B, FunctionCode.CHECK_A_EQUALS_B, "b5a4b1898af3745dbbb5becb83e72787df9952c9");
 	}
 
 	@Test
-	public void testCHECK_HASH160() throws ExecutionException {
-		// RIPEMD160 of ffffffffffffffffffffffffffffffffffffffffffffffff is 90e735014ea23aa89190121b229c06d58fc71e83
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("ffffffffffffffff"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A1.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A2.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A3.value).putInt(0);
-		// A4 unused
-
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("90e735014ea23aa8"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_B1.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("9190121b229c06d5"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_B2.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("8fc71e8300000000"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_B3.value).putInt(0);
-
-		codeByteBuffer.put(OpCode.EXT_FUN_RET.value).putShort(FunctionCode.CHECK_HASH160_A_WITH_B.value).putInt(1);
-
-		codeByteBuffer.put(OpCode.FIN_IMD.value);
-
-		execute(true);
-
-		assertEquals("RIPEMD160 hashes do not match", 1L, getData(1));
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+	public void testCHECK_RMD160() throws ExecutionException {
+		testHash("RIPE-MD160", null, FunctionCode.CHECK_RMD160_A_WITH_B, "b5a4b1898af3745dbbb5becb83e72787df9952c9");
 	}
 
 	@Test
 	public void testSHA256() throws ExecutionException {
-		// SHA256 of ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff is af9613760f72635fbdb44a5a0a63c39f12af30f950a6ee5c971be188e89c4051
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("ffffffffffffffff"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A1.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A2.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A3.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A4.value).putInt(0);
-
-		codeByteBuffer.put(OpCode.EXT_FUN.value).putShort(FunctionCode.SHA256_A_TO_B.value);
-
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("af9613760f72635f"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A1.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("bdb44a5a0a63c39f"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A2.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("12af30f950a6ee5c"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A3.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("971be188e89c4051"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A4.value).putInt(0);
-
-		codeByteBuffer.put(OpCode.EXT_FUN_RET.value).putShort(FunctionCode.CHECK_A_EQUALS_B.value).putInt(1);
-
-		codeByteBuffer.put(OpCode.FIN_IMD.value);
-
-		execute(true);
-
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
-		assertEquals("RIPEMD160 hashes do not match", 1L, getData(1));
+		testHash("SHA256", FunctionCode.SHA256_A_TO_B, FunctionCode.CHECK_A_EQUALS_B, "c01d63749ebe5d6b16f7247015cac2e49a5ac4fb6c7f24bed07b8aa904da97f3");
 	}
 
 	@Test
 	public void testCHECK_SHA256() throws ExecutionException {
-		// SHA256 of ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff is af9613760f72635fbdb44a5a0a63c39f12af30f950a6ee5c971be188e89c4051
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("ffffffffffffffff"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A1.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A2.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A3.value).putInt(0);
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A4.value).putInt(0);
+		testHash("SHA256", null, FunctionCode.CHECK_SHA256_A_WITH_B, "c01d63749ebe5d6b16f7247015cac2e49a5ac4fb6c7f24bed07b8aa904da97f3");
+	}
 
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("af9613760f72635f"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_B1.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("bdb44a5a0a63c39f"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_B2.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("12af30f950a6ee5c"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_B3.value).putInt(0);
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes("971be188e89c4051"));
-		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_B4.value).putInt(0);
+	@Test
+	public void testHASH160() throws ExecutionException {
+		testHash("HASH160", FunctionCode.HASH160_A_TO_B, FunctionCode.CHECK_A_EQUALS_B, "54d54a03fd447996ab004dee87fab80bf9477e23");
+	}
 
-		codeByteBuffer.put(OpCode.EXT_FUN_RET.value).putShort(FunctionCode.CHECK_SHA256_A_WITH_B.value).putInt(1);
-
-		codeByteBuffer.put(OpCode.FIN_IMD.value);
-
-		execute(true);
-
-		assertEquals("RIPEMD160 hashes do not match", 1L, getData(1));
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+	@Test
+	public void testCHECK_HASH160() throws ExecutionException {
+		testHash("HASH160", null, FunctionCode.CHECK_HASH160_A_WITH_B, "54d54a03fd447996ab004dee87fab80bf9477e23");
 	}
 
 	@Test
@@ -232,6 +105,59 @@ public class FunctionCodeTests extends ExecutableTest {
 
 		assertTrue(state.getIsFinished());
 		assertTrue(state.getHadFatalError());
+	}
+
+	private void testHash(String hashName, FunctionCode hashFunction, FunctionCode checkFunction, String expected) throws ExecutionException {
+		// Data addr 0 for setting values
+		dataByteBuffer.putLong(0L);
+		// Data addr 1 for results
+		dataByteBuffer.putLong(0L);
+
+		// Data addr 2+ for message
+		dataByteBuffer.put(messageBytes);
+
+		// MD5 data start
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(2L);
+		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A1.value).putInt(0);
+
+		// MD5 data length
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(messageBytes.length);
+		codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(FunctionCode.SET_A2.value).putInt(0);
+
+		// A3 unused
+		// A4 unused
+
+		// Optional hash function
+		if (hashFunction != null) {
+			codeByteBuffer.put(OpCode.EXT_FUN.value).putShort(hashFunction.value);
+			// Hash functions usually put result into B, but we need it in A
+			codeByteBuffer.put(OpCode.EXT_FUN.value).putShort(FunctionCode.SWAP_A_AND_B.value);
+		}
+
+		// Expected result goes into B
+		codeByteBuffer.put(OpCode.EXT_FUN.value).putShort(FunctionCode.CLEAR_B.value);
+		// Each 16 hex-chars (8 bytes) fits into each B word (B1, B2, B3 and B4)
+		for (int bWord = 0; bWord < 4 && bWord * 16 < expected.length(); ++bWord) {
+			final int beginIndex = bWord * 16;
+			final int endIndex = Math.min(expected.length(), beginIndex + 16);
+
+			String hexChars = expected.substring(beginIndex, endIndex);
+			codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).put(hexToBytes(hexChars));
+			codeByteBuffer.put(new byte[8 - hexChars.length() / 2]); // pad with zeros
+
+			final FunctionCode bSettingFunction = bSettingFunctions[bWord];
+			codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(bSettingFunction.value).putInt(0);
+		}
+
+		codeByteBuffer.put(OpCode.EXT_FUN_RET.value).putShort(checkFunction.value).putInt(1);
+
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue("MachineState isn't in finished state", state.getIsFinished());
+		assertFalse("MachineState encountered fatal error", state.getHadFatalError());
+		assertEquals(hashName + " hashes do not match", 1L, getData(1));
 	}
 
 }
