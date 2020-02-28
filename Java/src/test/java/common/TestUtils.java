@@ -6,7 +6,7 @@ import org.ciyam.at.MachineState;
 
 public class TestUtils {
 
-	// v3 constants replicated due to private cope in MachineState
+	// v3 constants replicated due to private scope in MachineState
 	public static final int CODE_PAGE_SIZE = 1;
 	public static final int DATA_PAGE_SIZE = MachineState.VALUE_SIZE;
 	public static final int CALL_STACK_PAGE_SIZE = MachineState.ADDRESS_SIZE;
