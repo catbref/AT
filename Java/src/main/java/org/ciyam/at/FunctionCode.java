@@ -1,7 +1,6 @@
 package org.ciyam.at;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -451,22 +450,20 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * MD5 data (offset A1, length A2) into B<br>
-	 * <tt>0x0200</tt>
-	 * MD5 message data starts at address in A1 and byte-length is in A2.<br>
+	 * MD5 data into B<br>
+	 * <tt>0x0200 start-addr byte-length</tt>
 	 * MD5 hash stored in B1 and B2. B3 and B4 are zeroed.
 	 */
-	MD5_A_TO_B(0x0200, 0, false) {
+	MD5_INTO_B(0x0200, 2, false) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			byte[] message = getHashData(state);
+			byte[] message = getHashData(functionData, state);
 
 			try {
 				MessageDigest digester = MessageDigest.getInstance("MD5");
 				byte[] digest = digester.digest(message);
 
 				ByteBuffer digestByteBuffer = ByteBuffer.wrap(digest);
-				digestByteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
 				state.b1 = digestByteBuffer.getLong();
 				state.b2 = digestByteBuffer.getLong();
@@ -478,23 +475,21 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * Check MD5 of data (offset A1, length A2) matches B<br>
-	 * <tt>0x0201</tt><br>
-	 * MD5 message data starts at address in A1 and byte-length is in A2.<br>
+	 * Check MD5 of data matches B<br>
+	 * <tt>0x0201 start-addr byte-length</tt><br>
 	 * Other MD5 hash is in B1 and B2. B3 and B4 are ignored.
 	 * Returns 1 if true, 0 if false
 	 */
-	CHECK_MD5_A_WITH_B(0x0201, 0, true) {
+	CHECK_MD5_WITH_B(0x0201, 2, true) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			byte[] message = getHashData(state);
+			byte[] message = getHashData(functionData, state);
 
 			try {
 				MessageDigest digester = MessageDigest.getInstance("MD5");
 				byte[] actualDigest = digester.digest(message);
 
-				ByteBuffer digestByteBuffer = ByteBuffer.allocate(2 * MachineState.VALUE_SIZE);
-				digestByteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+				ByteBuffer digestByteBuffer = ByteBuffer.allocate(digester.getDigestLength());
 
 				digestByteBuffer.putLong(state.b1);
 				digestByteBuffer.putLong(state.b2);
@@ -511,26 +506,24 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * RIPE-MD160 data (offset A1, length A2) into B<br>
-	 * <tt>0x0202</tt>
-	 * RIPE-MD160 message data starts at address in A1 and byte-length is in A2.<br>
-	 * RIPE-MD160 hash stored in B1, B2 and LSB of B3. B4 is zeroed.
+	 * RIPE-MD160 data into B<br>
+	 * <tt>0x0202 start-addr byte-length</tt>
+	 * RIPE-MD160 hash stored in LSB of B1 and all of B2 and B3. B4 is zeroed.
 	 */
-	RMD160_A_TO_B(0x0202, 0, false) {
+	RMD160_INTO_B(0x0202, 2, false) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			byte[] message = getHashData(state);
+			byte[] message = getHashData(functionData, state);
 
 			try {
 				MessageDigest digester = MessageDigest.getInstance("RIPEMD160");
 				byte[] digest = digester.digest(message);
 
 				ByteBuffer digestByteBuffer = ByteBuffer.wrap(digest);
-				digestByteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-				state.b1 = digestByteBuffer.getLong();
+				state.b1 = (long) digestByteBuffer.getInt() & 0xffffffffL;
 				state.b2 = digestByteBuffer.getLong();
-				state.b3 = (long) digestByteBuffer.getInt() & 0xffffffffL;
+				state.b3 = digestByteBuffer.getLong();
 				state.b4 = 0L;
 			} catch (NoSuchAlgorithmException e) {
 				throw new ExecutionException("No RIPEMD160 message digest service available", e);
@@ -538,27 +531,25 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * Check RIPE-MD160 of data (offset A1, length A2) matches B<br>
-	 * <tt>0x0203</tt><br>
-	 * RIPE-MD160 message data starts at address in A1 and byte-length is in A2.<br>
-	 * Other RIPE-MD160 hash is in B1, B2 and LSB of B3. B4 is ignored.
+	 * Check RIPE-MD160 of data matches B<br>
+	 * <tt>0x0203 start-addr byte-length</tt><br>
+	 * Other RIPE-MD160 hash is in LSB of B1 and all of B2 and B3. B4 is ignored.
 	 * Returns 1 if true, 0 if false
 	 */
-	CHECK_RMD160_A_WITH_B(0x0203, 0, true) {
+	CHECK_RMD160_WITH_B(0x0203, 2, true) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			byte[] message = getHashData(state);
+			byte[] message = getHashData(functionData, state);
 
 			try {
 				MessageDigest digester = MessageDigest.getInstance("RIPEMD160");
 				byte[] actualDigest = digester.digest(message);
 
 				ByteBuffer digestByteBuffer = ByteBuffer.allocate(digester.getDigestLength());
-				digestByteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-				digestByteBuffer.putLong(state.b1);
+				digestByteBuffer.putInt((int) (state.b1 & 0xffffffffL));
 				digestByteBuffer.putLong(state.b2);
-				digestByteBuffer.putInt((int) (state.b3 & 0xffffffffL));
+				digestByteBuffer.putLong(state.b3);
 				// NOTE: b4 ignored
 
 				byte[] expectedDigest = digestByteBuffer.array();
@@ -573,22 +564,20 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * SHA256 data (offset A1, length A2) into B<br>
-	 * <tt>0x0204</tt>
-	 * SHA256 message data starts at address in A1 and byte-length is in A2.<br>
+	 * SHA256 data into B<br>
+	 * <tt>0x0204 start-addr byte-length</tt>
 	 * SHA256 hash is stored in B1 through B4.
 	 */
-	SHA256_A_TO_B(0x0204, 0, false) {
+	SHA256_INTO_B(0x0204, 2, false) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			byte[] message = getHashData(state);
+			byte[] message = getHashData(functionData, state);
 
 			try {
 				MessageDigest digester = MessageDigest.getInstance("SHA-256");
 				byte[] digest = digester.digest(message);
 
 				ByteBuffer digestByteBuffer = ByteBuffer.wrap(digest);
-				digestByteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
 				state.b1 = digestByteBuffer.getLong();
 				state.b2 = digestByteBuffer.getLong();
@@ -600,23 +589,21 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * Check SHA256 of data (offset A1, length A2) matches B<br>
-	 * <tt>0x0205</tt><br>
-	 * SHA256 message data starts at address in A1 and byte-length is in A2.<br>
+	 * Check SHA256 of data matches B<br>
+	 * <tt>0x0205 start-addr byte-length</tt><br>
 	 * Other SHA256 hash is in B1 through B4.
 	 * Returns 1 if true, 0 if false
 	 */
-	CHECK_SHA256_A_WITH_B(0x0205, 0, true) {
+	CHECK_SHA256_WITH_B(0x0205, 2, true) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			byte[] message = getHashData(state);
+			byte[] message = getHashData(functionData, state);
 
 			try {
 				MessageDigest digester = MessageDigest.getInstance("SHA-256");
 				byte[] actualDigest = digester.digest(message);
 
-				ByteBuffer digestByteBuffer = ByteBuffer.allocate(4 * MachineState.VALUE_SIZE);
-				digestByteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+				ByteBuffer digestByteBuffer = ByteBuffer.allocate(digester.getDigestLength());
 
 				digestByteBuffer.putLong(state.b1);
 				digestByteBuffer.putLong(state.b2);
@@ -635,16 +622,15 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * HASH160 data (offset A1, length A2) into B<br>
-	 * <tt>0x0206</tt>
+	 * HASH160 data into B<br>
+	 * <tt>0x0206 start-addr byte-length</tt>
 	 * Bitcoin's HASH160 hash is equivalent to RMD160(SHA256(data)).<br>
-	 * HASH160 message data starts at address in A1 and byte-length is in A2.<br>
-	 * HASH160 hash stored in B1, B2 and LSB of B3. B4 is zeroed.
+	 * HASH160 hash stored in LSB of B1 and all of B2 and B3. B4 is zeroed.
 	 */
-	HASH160_A_TO_B(0x0206, 0, false) {
+	HASH160_INTO_B(0x0206, 2, false) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			byte[] message = getHashData(state);
+			byte[] message = getHashData(functionData, state);
 
 			try {
 				MessageDigest sha256Digester = MessageDigest.getInstance("SHA-256");
@@ -654,11 +640,10 @@ public enum FunctionCode {
 				byte[] rmd160Digest = rmd160Digester.digest(sha256Digest);
 
 				ByteBuffer digestByteBuffer = ByteBuffer.wrap(rmd160Digest);
-				digestByteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-				state.b1 = digestByteBuffer.getLong();
+				state.b1 = (long) digestByteBuffer.getInt() & 0xffffffffL;
 				state.b2 = digestByteBuffer.getLong();
-				state.b3 = (long) digestByteBuffer.getInt() & 0xffffffffL;
+				state.b3 = digestByteBuffer.getLong();
 				state.b4 = 0L;
 			} catch (NoSuchAlgorithmException e) {
 				throw new ExecutionException("No SHA-256 or RIPEMD160 message digest service available", e);
@@ -666,16 +651,15 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * Check HASH160 of data (offset A1, length A2) matches B<br>
-	 * <tt>0x0207</tt><br>
-	 * HASH160 message data starts at address in A1 and byte-length is in A2.<br>
+	 * Check HASH160 of data matches B<br>
+	 * <tt>0x0207 start-addr byte-length</tt><br>
 	 * Other HASH160 hash is in B1, B2 and LSB of B3. B4 is ignored.
 	 * Returns 1 if true, 0 if false
 	 */
-	CHECK_HASH160_A_WITH_B(0x0207, 0, true) {
+	CHECK_HASH160_WITH_B(0x0207, 2, true) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			byte[] message = getHashData(state);
+			byte[] message = getHashData(functionData, state);
 
 			try {
 				MessageDigest sha256Digester = MessageDigest.getInstance("SHA-256");
@@ -685,11 +669,10 @@ public enum FunctionCode {
 				byte[] rmd160Digest = rmd160Digester.digest(sha256Digest);
 
 				ByteBuffer digestByteBuffer = ByteBuffer.allocate(rmd160Digester.getDigestLength());
-				digestByteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-				digestByteBuffer.putLong(state.b1);
+				digestByteBuffer.putInt((int) (state.b1 & 0xffffffffL));
 				digestByteBuffer.putLong(state.b2);
-				digestByteBuffer.putInt((int) (state.b3 & 0xffffffffL));
+				digestByteBuffer.putLong(state.b3);
 				// NOTE: b4 ignored
 
 				byte[] expectedDigest = digestByteBuffer.array();
@@ -1019,17 +1002,17 @@ public enum FunctionCode {
 
 	// TODO: public abstract String disassemble();
 
-	protected byte[] getHashData(MachineState state) throws ExecutionException {
+	protected byte[] getHashData(FunctionData functionData, MachineState state) throws ExecutionException {
 		// Validate data offset in A1
-		if (state.a1 < 0L || state.a1 > Integer.MAX_VALUE || state.a1 >= state.numDataPages)
-			throw new ExecutionException("MD5 data offset (A1) out of bounds");
+		if (functionData.value1 < 0L || functionData.value1 > Integer.MAX_VALUE || functionData.value1 >= state.numDataPages)
+			throw new ExecutionException(this.name() + " data start address out of bounds");
 
 		// Validate data length in A2
-		if (state.a2 < 0L || state.a2 > Integer.MAX_VALUE || state.a1 + byteLengthToDataLength(state.a2) > state.numDataPages)
-			throw new ExecutionException("MD5 data length (A2) invalid");
+		if (functionData.value2 < 0L || functionData.value2 > Integer.MAX_VALUE || functionData.value1 + byteLengthToDataLength(functionData.value2) > state.numDataPages)
+			throw new ExecutionException(this.name() + " data length invalid");
 
-		final int dataStart = (int) (state.a1 & 0x7fffffffL);
-		final int dataLength = (int) (state.a2 & 0x7fffffffL);
+		final int dataStart = (int) (functionData.value1 & 0x7fffffffL);
+		final int dataLength = (int) (functionData.value2 & 0x7fffffffL);
 
 		byte[] message = new byte[dataLength];
 

@@ -1,4 +1,3 @@
-import static common.TestUtils.*;
 import static org.junit.Assert.*;
 
 import org.ciyam.at.ExecutionException;
@@ -28,7 +27,7 @@ public class CallStackOpCodeTests extends ExecutableTest {
 		assertTrue(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
 
-		int expectedCallStackPosition = (state.numCallStackPages - 1) * CALL_STACK_PAGE_SIZE;
+		int expectedCallStackPosition = (state.numCallStackPages - 1) * MachineState.ADDRESS_SIZE;
 		assertEquals("Call stack pointer incorrect", expectedCallStackPosition, getCallStackPosition());
 
 		assertEquals("Return address does not match", returnAddress, getCallStackEntry(expectedCallStackPosition));
@@ -62,7 +61,7 @@ public class CallStackOpCodeTests extends ExecutableTest {
 		assertTrue(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
 
-		int expectedCallStackPosition = (state.numCallStackPages - 1 - 1) * CALL_STACK_PAGE_SIZE;
+		int expectedCallStackPosition = (state.numCallStackPages - 1 - 1) * MachineState.ADDRESS_SIZE;
 		assertEquals("Call stack pointer incorrect", expectedCallStackPosition, getCallStackPosition());
 
 		assertEquals("Return address does not match", returnAddress2, getCallStackEntry(expectedCallStackPosition));
@@ -106,7 +105,7 @@ public class CallStackOpCodeTests extends ExecutableTest {
 		assertTrue(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
 
-		int expectedCallStackPosition = (state.numCallStackPages - 1 + 1) * CALL_STACK_PAGE_SIZE;
+		int expectedCallStackPosition = (state.numCallStackPages - 1 + 1) * MachineState.ADDRESS_SIZE;
 		assertEquals("Call stack pointer incorrect", expectedCallStackPosition, getCallStackPosition());
 
 		assertEquals("Return address not cleared", 0L, getCallStackEntry(expectedCallStackPosition - MachineState.ADDRESS_SIZE));
@@ -143,7 +142,7 @@ public class CallStackOpCodeTests extends ExecutableTest {
 		assertTrue(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
 
-		int expectedCallStackPosition = (state.numCallStackPages - 1 - 1 + 1 + 1) * CALL_STACK_PAGE_SIZE;
+		int expectedCallStackPosition = (state.numCallStackPages - 1 - 1 + 1 + 1) * MachineState.ADDRESS_SIZE;
 		assertEquals("Call stack pointer incorrect", expectedCallStackPosition, getCallStackPosition());
 
 		assertEquals("Return address not cleared", 0L, getCallStackEntry(expectedCallStackPosition - MachineState.ADDRESS_SIZE));

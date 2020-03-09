@@ -4,7 +4,6 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toMap;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Map;
 
 /**
@@ -191,9 +190,7 @@ public abstract class API {
 	}
 
 	public void setA(MachineState state, byte[] bytes) {
-		// Enforce endian
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
 		state.a1 = byteBuffer.getLong();
 		state.a2 = byteBuffer.getLong();
@@ -218,9 +215,7 @@ public abstract class API {
 	}
 
 	public void setB(MachineState state, byte[] bytes) {
-		// Enforce endian
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
 		state.b1 = byteBuffer.getLong();
 		state.b2 = byteBuffer.getLong();

@@ -129,17 +129,17 @@ public class ACCTAPI extends API {
 		this.blockchain.add(block);
 	}
 
-	/** Convert long to little-endian byte array */
+	/** Convert long to big-endian byte array */
 	@SuppressWarnings("unused")
 	private byte[] toByteArray(long value) {
-		return new byte[] { (byte) (value), (byte) (value >> 8), (byte) (value >> 16), (byte) (value >> 24), (byte) (value >> 32), (byte) (value >> 40),
-				(byte) (value >> 48), (byte) (value >> 56) };
+		return new byte[] { (byte) (value >> 56), (byte) (value >> 48), (byte) (value >> 40), (byte) (value >> 32),
+				(byte) (value >> 24), (byte) (value >> 16), (byte) (value >> 8), (byte) (value) };
 	}
 
-	/** Convert part of little-endian byte[] to long */
+	/** Convert part of big-endian byte[] to long */
 	private long fromBytes(byte[] bytes, int start) {
-		return (bytes[start] & 0xffL) | (bytes[start + 1] & 0xffL) << 8 | (bytes[start + 2] & 0xffL) << 16 | (bytes[start + 3] & 0xffL) << 24
-				| (bytes[start + 4] & 0xffL) << 32 | (bytes[start + 5] & 0xffL) << 40 | (bytes[start + 6] & 0xffL) << 48 | (bytes[start + 7] & 0xffL) << 56;
+		return (bytes[start] & 0xffL) << 56 | (bytes[start + 1] & 0xffL) << 48 | (bytes[start + 2] & 0xffL) << 40 | (bytes[start + 3] & 0xffL) << 32
+				| (bytes[start + 4] & 0xffL) << 24 | (bytes[start + 5] & 0xffL) << 16 | (bytes[start + 6] & 0xffL) << 8 | (bytes[start + 7] & 0xffL);
 	}
 
 	private String getRandomAccount() {

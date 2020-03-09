@@ -1,4 +1,3 @@
-import static common.TestUtils.hexToBytes;
 import static org.junit.Assert.*;
 
 import org.ciyam.at.ExecutionException;
@@ -8,6 +7,7 @@ import org.ciyam.at.OpCode;
 import org.junit.Test;
 
 import common.ExecutableTest;
+import common.TestUtils;
 
 public class MiscTests extends ExecutableTest {
 
@@ -52,17 +52,16 @@ public class MiscTests extends ExecutableTest {
 
 	@Test
 	public void testMinActivation() throws ExecutionException {
-		long minActivation = 12345L; // 0x0000000000003039
+		long minActivationAmount = 12345L; // 0x0000000000003039
 
-		// version 0002, reserved 0000, code 0200 * 1, data 0020 * 8, call stack 0010 * 4, user stack 0010 * 4, minActivation = 12345L
-		byte[] headerBytes = hexToBytes("0200" + "0000" + "0002" + "2000" + "1000" + "1000" + "3930000000000000");
+		byte[] headerBytes = TestUtils.toHeaderBytes(TestUtils.VERSION, TestUtils.NUM_CODE_PAGES, TestUtils.NUM_DATA_PAGES, TestUtils.NUM_CALL_STACK_PAGES, TestUtils.NUM_USER_STACK_PAGES, minActivationAmount);
 		byte[] codeBytes = codeByteBuffer.array();
 		byte[] dataBytes = new byte[0];
 
 		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
 
 		assertTrue(state.getIsFrozen());
-		assertEquals((Long) (minActivation - 1L), state.getFrozenBalance());
+		assertEquals((Long) (minActivationAmount - 1L), state.getFrozenBalance());
 	}
 
 }

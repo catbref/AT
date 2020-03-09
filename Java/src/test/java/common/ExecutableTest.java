@@ -1,9 +1,6 @@
 package common;
 
-import static common.TestUtils.hexToBytes;
-
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -14,10 +11,8 @@ import org.junit.BeforeClass;
 
 public abstract class ExecutableTest {
 
-	public static final int CODE_STACK_SIZE = 0x0200;
-	public static final int DATA_OFFSET = 6 * 2 + 8;
-	public static final int DATA_STACK_SIZE = 0x0200;
-	public static final int CALL_STACK_OFFSET = DATA_OFFSET + DATA_STACK_SIZE * 8;
+	private static final int DATA_OFFSET = MachineState.HEADER_LENGTH; // code bytes are not present
+	private static final int CALL_STACK_OFFSET = DATA_OFFSET + TestUtils.NUM_DATA_PAGES * MachineState.VALUE_SIZE;
 
 	public TestLogger logger;
 	public TestAPI api;
@@ -38,8 +33,8 @@ public abstract class ExecutableTest {
 	public void beforeTest() {
 		logger = new TestLogger();
 		api = new TestAPI();
-		codeByteBuffer = ByteBuffer.allocate(CODE_STACK_SIZE).order(ByteOrder.LITTLE_ENDIAN);
-		dataByteBuffer = ByteBuffer.allocate(DATA_STACK_SIZE).order(ByteOrder.LITTLE_ENDIAN);
+		codeByteBuffer = ByteBuffer.allocate(TestUtils.NUM_CODE_PAGES * MachineState.OPCODE_SIZE);
+		dataByteBuffer = ByteBuffer.allocate(TestUtils.NUM_DATA_PAGES * MachineState.VALUE_SIZE);
 		stateByteBuffer = null;
 	}
 
@@ -53,8 +48,7 @@ public abstract class ExecutableTest {
 	}
 
 	protected void execute(boolean onceOnly) {
-		// version 0002, reserved 0000, code 0200 * 1, data 0200 * 8, call stack 0010 * 4, user stack 0010 * 4, minActivation = 0
-		byte[] headerBytes = hexToBytes("0200" + "0000" + "0002" + "0002" + "1000" + "1000" + "0000000000000000");
+		byte[] headerBytes = TestUtils.HEADER_BYTES;
 		byte[] codeBytes = codeByteBuffer.array();
 		byte[] dataBytes = dataByteBuffer.array();
 
@@ -98,9 +92,9 @@ public abstract class ExecutableTest {
 		byte[] stateBytes = state.toBytes();
 
 		// We know how the state will be serialized so we can extract values
-		// header(6) + data(size * 8) + callStack length(4) + callStack + userStack length(4) + userStack
+		// header + data(size * 8) + callStack length(4) + callStack + userStack length(4) + userStack
 
-		stateByteBuffer = ByteBuffer.wrap(stateBytes).order(ByteOrder.LITTLE_ENDIAN);
+		stateByteBuffer = ByteBuffer.wrap(stateBytes);
 		callStackSize = stateByteBuffer.getInt(CALL_STACK_OFFSET);
 		userStackOffset = CALL_STACK_OFFSET + 4 + callStackSize;
 		userStackSize = stateByteBuffer.getInt(userStackOffset);
@@ -112,20 +106,20 @@ public abstract class ExecutableTest {
 	}
 
 	protected int getCallStackPosition() {
-		return 0x0010 * MachineState.ADDRESS_SIZE - callStackSize;
+		return TestUtils.NUM_CALL_STACK_PAGES * MachineState.ADDRESS_SIZE - callStackSize;
 	}
 
 	protected int getCallStackEntry(int address) {
-		int index = CALL_STACK_OFFSET + 4 + address - 0x0010 * MachineState.ADDRESS_SIZE + callStackSize;
+		int index = CALL_STACK_OFFSET + 4 + address - TestUtils.NUM_CALL_STACK_PAGES * MachineState.ADDRESS_SIZE + callStackSize;
 		return stateByteBuffer.getInt(index);
 	}
 
 	protected int getUserStackPosition() {
-		return 0x0010 * MachineState.VALUE_SIZE - userStackSize;
+		return TestUtils.NUM_USER_STACK_PAGES * MachineState.VALUE_SIZE - userStackSize;
 	}
 
 	protected long getUserStackEntry(int address) {
-		int index = userStackOffset + 4 + address - 0x0010 * MachineState.VALUE_SIZE + userStackSize;
+		int index = userStackOffset + 4 + address - TestUtils.NUM_USER_STACK_PAGES * MachineState.VALUE_SIZE + userStackSize;
 		return stateByteBuffer.getLong(index);
 	}
 

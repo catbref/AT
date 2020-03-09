@@ -1,7 +1,7 @@
-import static common.TestUtils.*;
 import static org.junit.Assert.*;
 
 import org.ciyam.at.ExecutionException;
+import org.ciyam.at.MachineState;
 import org.ciyam.at.OpCode;
 import org.junit.Test;
 
@@ -20,7 +20,7 @@ public class UserStackOpCodeTests extends ExecutableTest {
 		assertTrue(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
 
-		int expectedUserStackPosition = (state.numUserStackPages - 1) * USER_STACK_PAGE_SIZE;
+		int expectedUserStackPosition = (state.numUserStackPages - 1) * MachineState.VALUE_SIZE;
 		assertEquals("User stack pointer incorrect", expectedUserStackPosition, getUserStackPosition());
 		assertEquals("Data does not match", 4444L, getUserStackEntry(expectedUserStackPosition));
 	}
@@ -38,7 +38,7 @@ public class UserStackOpCodeTests extends ExecutableTest {
 		assertTrue(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
 
-		int expectedUserStackPosition = (state.numUserStackPages - 2) * USER_STACK_PAGE_SIZE;
+		int expectedUserStackPosition = (state.numUserStackPages - 2) * MachineState.VALUE_SIZE;
 		assertEquals("User stack pointer incorrect", expectedUserStackPosition, getUserStackPosition());
 		assertEquals("Data does not match", 3333L, getUserStackEntry(expectedUserStackPosition));
 	}
@@ -95,7 +95,7 @@ public class UserStackOpCodeTests extends ExecutableTest {
 		assertTrue(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
 
-		int expectedUserStackPosition = (state.numUserStackPages - 1 + 1) * USER_STACK_PAGE_SIZE;
+		int expectedUserStackPosition = (state.numUserStackPages - 1 + 1) * MachineState.VALUE_SIZE;
 		assertEquals("User stack pointer incorrect", expectedUserStackPosition, getUserStackPosition());
 		assertEquals("Data does not match", 4444L, getData(1));
 		// Following test is not applicable when using serialized state:
@@ -117,7 +117,7 @@ public class UserStackOpCodeTests extends ExecutableTest {
 		assertTrue(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
 
-		int expectedUserStackPosition = (state.numUserStackPages - 1 - 1 + 1 + 1) * USER_STACK_PAGE_SIZE;
+		int expectedUserStackPosition = (state.numUserStackPages - 1 - 1 + 1 + 1) * MachineState.VALUE_SIZE;
 		assertEquals("User stack pointer incorrect", expectedUserStackPosition, getUserStackPosition());
 		assertEquals("Data does not match", 3333L, getData(2));
 		assertEquals("Data does not match", 4444L, getData(3));

@@ -1,16 +1,19 @@
 package common;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 import org.ciyam.at.MachineState;
 
 public class TestUtils {
 
-	// v3 constants replicated due to private scope in MachineState
-	public static final int CODE_PAGE_SIZE = 1;
-	public static final int DATA_PAGE_SIZE = MachineState.VALUE_SIZE;
-	public static final int CALL_STACK_PAGE_SIZE = MachineState.ADDRESS_SIZE;
-	public static final int USER_STACK_PAGE_SIZE = MachineState.VALUE_SIZE;
+	public static final short VERSION = 2;
+	public static final short NUM_CODE_PAGES = 0x0200;
+	public static final short NUM_DATA_PAGES = 0x0200;
+	public static final short NUM_CALL_STACK_PAGES = 0x0010;
+	public static final short NUM_USER_STACK_PAGES = 0x0010;
+	public static final long MIN_ACTIVATION_AMOUNT = 0L;
+	public static final byte[] HEADER_BYTES = toHeaderBytes(VERSION, NUM_CODE_PAGES, NUM_DATA_PAGES, NUM_CALL_STACK_PAGES, NUM_USER_STACK_PAGES, MIN_ACTIVATION_AMOUNT);
 
 	public static byte[] hexToBytes(String hex) {
 		byte[] output = new byte[hex.length() / 2];
@@ -24,6 +27,33 @@ public class TestUtils {
 		System.arraycopy(converted, convertedStart, output, outputStart, convertedLength);
 
 		return output;
+	}
+
+	public static byte[] toHeaderBytes(short version, short numCodePages, short numDataPages, short numCallStackPages, short numUserStackPages, long minActivationAmount) {
+		ByteBuffer byteBuffer = ByteBuffer.allocate(MachineState.HEADER_LENGTH);
+
+		// Version
+		byteBuffer.putShort(version);
+
+		// Reserved
+		byteBuffer.putShort((short) 0);
+
+		// Code length
+		byteBuffer.putShort(numCodePages);
+
+		// Data length
+		byteBuffer.putShort(numDataPages);
+
+		// Call stack length
+		byteBuffer.putShort(numCallStackPages);
+
+		// User stack length
+		byteBuffer.putShort(numUserStackPages);
+
+		// Minimum activation amount
+		byteBuffer.putLong(minActivationAmount);
+
+		return byteBuffer.array();
 	}
 
 }

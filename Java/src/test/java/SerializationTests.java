@@ -2,7 +2,6 @@ import static common.TestUtils.hexToBytes;
 import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import org.ciyam.at.ExecutionException;
@@ -15,6 +14,7 @@ import org.junit.Test;
 
 import common.TestAPI;
 import common.TestLogger;
+import common.TestUtils;
 
 public class SerializationTests {
 
@@ -27,7 +27,7 @@ public class SerializationTests {
 	public void beforeTest() {
 		logger = new TestLogger();
 		api = new TestAPI();
-		codeByteBuffer = ByteBuffer.allocate(512).order(ByteOrder.LITTLE_ENDIAN);
+		codeByteBuffer = ByteBuffer.allocate(512);
 	}
 
 	@After
@@ -38,8 +38,7 @@ public class SerializationTests {
 	}
 
 	private byte[] simulate() {
-		// version 0002, reserved 0000, code 0200 * 1, data 0020 * 8, call stack 0010 * 4, user stack 0010 * 4, minActivation = 0
-		byte[] headerBytes = hexToBytes("0200" + "0000" + "0002" + "2000" + "1000" + "1000" + "0000000000000000");
+		byte[] headerBytes = TestUtils.HEADER_BYTES;
 		byte[] codeBytes = codeByteBuffer.array();
 		byte[] dataBytes = new byte[0];
 

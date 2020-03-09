@@ -3,7 +3,6 @@ package org.ciyam.at;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -143,7 +142,6 @@ public class MachineState {
 
 		// Parsing header bytes
 		ByteBuffer byteBuffer = ByteBuffer.wrap(this.headerBytes);
-		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
 		this.version = byteBuffer.getShort();
 		if (this.version < 1)
@@ -174,14 +172,14 @@ public class MachineState {
 		this.minActivationAmount = byteBuffer.getLong();
 
 		// Header OK - set up code and data buffers
-		this.codeByteBuffer = ByteBuffer.allocate(this.numCodePages * this.constants.CODE_PAGE_SIZE).order(ByteOrder.LITTLE_ENDIAN);
-		this.dataByteBuffer = ByteBuffer.allocate(this.numDataPages * this.constants.DATA_PAGE_SIZE).order(ByteOrder.LITTLE_ENDIAN);
+		this.codeByteBuffer = ByteBuffer.allocate(this.numCodePages * this.constants.CODE_PAGE_SIZE);
+		this.dataByteBuffer = ByteBuffer.allocate(this.numDataPages * this.constants.DATA_PAGE_SIZE);
 
 		// Set up stacks
-		this.callStackByteBuffer = ByteBuffer.allocate(this.numCallStackPages * this.constants.CALL_STACK_PAGE_SIZE).order(ByteOrder.LITTLE_ENDIAN);
+		this.callStackByteBuffer = ByteBuffer.allocate(this.numCallStackPages * this.constants.CALL_STACK_PAGE_SIZE);
 		this.callStackByteBuffer.position(this.callStackByteBuffer.limit()); // Downward-growing stack, so start at the end
 
-		this.userStackByteBuffer = ByteBuffer.allocate(this.numUserStackPages * this.constants.USER_STACK_PAGE_SIZE).order(ByteOrder.LITTLE_ENDIAN);
+		this.userStackByteBuffer = ByteBuffer.allocate(this.numUserStackPages * this.constants.USER_STACK_PAGE_SIZE);
 		this.userStackByteBuffer.position(this.userStackByteBuffer.limit()); // Downward-growing stack, so start at the end
 
 		this.api = api;
@@ -346,7 +344,6 @@ public class MachineState {
 
 	public byte[] getA() {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(4 * 8);
-		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
 		byteBuffer.putLong(this.a1);
 		byteBuffer.putLong(this.a2);
@@ -374,7 +371,6 @@ public class MachineState {
 
 	public byte[] getB() {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(4 * 8);
-		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
 		byteBuffer.putLong(this.b1);
 		byteBuffer.putLong(this.b2);
@@ -455,7 +451,6 @@ public class MachineState {
 		byte[] creationBytes = new byte[creationBytesLength];
 
 		ByteBuffer byteBuffer = ByteBuffer.wrap(creationBytes);
-		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
 		// Header bytes:
 
@@ -574,7 +569,7 @@ public class MachineState {
 
 	/** For restoring a previously serialized machine state */
 	public static MachineState fromBytes(API api, LoggerInterface logger, byte[] bytes, byte[] codeBytes) {
-		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
+		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 
 		byte[] headerBytes = new byte[HEADER_LENGTH];
 		byteBuffer.get(headerBytes);
@@ -680,15 +675,15 @@ public class MachineState {
 		}
 	}
 
-	/** Convert int to little-endian byte array */
+	/** Convert int to big-endian byte array */
 	private byte[] toByteArray(int value) {
-		return new byte[] { (byte) (value), (byte) (value >> 8), (byte) (value >> 16), (byte) (value >> 24) };
+		return new byte[] { (byte) (value >> 24), (byte) (value >> 16), (byte) (value >> 8), (byte) (value) };
 	}
 
-	/** Convert long to little-endian byte array */
+	/** Convert long to big-endian byte array */
 	private byte[] toByteArray(long value) {
-		return new byte[] { (byte) (value), (byte) (value >> 8), (byte) (value >> 16), (byte) (value >> 24), (byte) (value >> 32), (byte) (value >> 40),
-				(byte) (value >> 48), (byte) (value >> 56) };
+		return new byte[] { (byte) (value >> 56), (byte) (value >> 48), (byte) (value >> 40), (byte) (value >> 32),
+				(byte) (value >> 24), (byte) (value >> 16), (byte) (value >> 8), (byte) (value) };
 	}
 
 	/**
