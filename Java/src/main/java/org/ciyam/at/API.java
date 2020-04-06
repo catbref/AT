@@ -56,11 +56,11 @@ public abstract class API {
 		return getCurrentBlockHeight() - 1;
 	}
 
-	/** Put previous block's signature hash in A */
-	public abstract void putPreviousBlockHashInA(MachineState state);
+	/** Put previous block's signature/hash into A */
+	public abstract void putPreviousBlockHashIntoA(MachineState state);
 
-	/** Put next transaction to AT after timestamp in A, or zero A if no more transactions */
-	public abstract void putTransactionAfterTimestampInA(Timestamp timestamp, MachineState state);
+	/** Put signature/hash of next transaction sent to AT after timestamp in A, or zero A if no more transactions */
+	public abstract void putTransactionAfterTimestampIntoA(Timestamp timestamp, MachineState state);
 
 	/** Return type from transaction in A, or 0xffffffffffffffff if A not valid transaction */
 	public abstract long getTypeFromTransactionInA(MachineState state);

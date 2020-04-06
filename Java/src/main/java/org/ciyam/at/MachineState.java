@@ -28,6 +28,9 @@ public class MachineState {
 	/** Maximum value for an address in the code segment */
 	public static final int MAX_CODE_ADDRESS = 0x0000ffff;
 
+	/** Size of A or B register. */
+	public static final int AB_REGISTER_SIZE = 32;
+
 	private static class VersionedConstants {
 		/** Bytes per code page */
 		public final int CODE_PAGE_SIZE;
@@ -676,12 +679,12 @@ public class MachineState {
 	}
 
 	/** Convert int to big-endian byte array */
-	private byte[] toByteArray(int value) {
+	public static byte[] toByteArray(int value) {
 		return new byte[] { (byte) (value >> 24), (byte) (value >> 16), (byte) (value >> 8), (byte) (value) };
 	}
 
 	/** Convert long to big-endian byte array */
-	private byte[] toByteArray(long value) {
+	public static byte[] toByteArray(long value) {
 		return new byte[] { (byte) (value >> 56), (byte) (value >> 48), (byte) (value >> 40), (byte) (value >> 32),
 				(byte) (value >> 24), (byte) (value >> 16), (byte) (value >> 8), (byte) (value) };
 	}

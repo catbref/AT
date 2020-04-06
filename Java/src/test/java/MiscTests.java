@@ -7,6 +7,7 @@ import org.ciyam.at.OpCode;
 import org.junit.Test;
 
 import common.ExecutableTest;
+import common.TestAPI;
 import common.TestUtils;
 
 public class MiscTests extends ExecutableTest {
@@ -40,8 +41,9 @@ public class MiscTests extends ExecutableTest {
 		// Infinite loop
 		codeByteBuffer.put(OpCode.JMP_ADR.value).putInt(0);
 
-		// If starting balance is 1234 then should take about 3 rounds as 500 steps max each round.
-		for (int i = 0; i < 3; ++i)
+		// We need enough rounds to exhaust balance
+		long minRounds = TestAPI.DEFAULT_INITIAL_BALANCE / TestAPI.MAX_STEPS_PER_ROUND + 1;
+		for (long i = 0; i < minRounds; ++i)
 			execute(true);
 
 		assertTrue(state.getIsFrozen());
@@ -52,7 +54,8 @@ public class MiscTests extends ExecutableTest {
 
 	@Test
 	public void testMinActivation() throws ExecutionException {
-		long minActivationAmount = 12345L; // 0x0000000000003039
+		// Make sure minimum activation amount is greater than initial balance
+		long minActivationAmount = TestAPI.DEFAULT_INITIAL_BALANCE * 2L;
 
 		byte[] headerBytes = TestUtils.toHeaderBytes(TestUtils.VERSION, TestUtils.NUM_CODE_PAGES, TestUtils.NUM_DATA_PAGES, TestUtils.NUM_CALL_STACK_PAGES, TestUtils.NUM_USER_STACK_PAGES, minActivationAmount);
 		byte[] codeBytes = codeByteBuffer.array();

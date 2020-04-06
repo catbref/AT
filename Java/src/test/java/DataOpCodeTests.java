@@ -20,6 +20,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertEquals("Data does not match", 2222L, getData(2));
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testSET_VALunbounded() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(9999).putLong(2222L);
@@ -44,6 +45,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertEquals("Data does not match", 2222L, getData(1));
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testSET_DATunbounded() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_DAT.value).putInt(9999).putInt(2);
@@ -55,6 +57,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testSET_DATunbounded2() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_DAT.value).putInt(1).putInt(9999);
@@ -82,6 +85,7 @@ public class DataOpCodeTests extends ExecutableTest {
 			assertEquals(0L, getData(i));
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testCLR_DATunbounded() throws ExecutionException {
 		codeByteBuffer.put(OpCode.CLR_DAT.value).putInt(9999);
@@ -106,6 +110,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertEquals("Data does not match", 2222L + 1L, getData(2));
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testINC_DATunbounded() throws ExecutionException {
 		codeByteBuffer.put(OpCode.INC_DAT.value).putInt(9999);
@@ -117,6 +122,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that incrementing maximum unsigned long value overflows back to zero correctly. */
 	@Test
 	public void testINC_DAToverflow() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(0xffffffffffffffffL);
@@ -143,6 +149,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertEquals("Data does not match", 2222L - 1L, getData(2));
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testDEC_DATunbounded() throws ExecutionException {
 		codeByteBuffer.put(OpCode.DEC_DAT.value).putInt(9999);
@@ -153,6 +160,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that decrementing zero long value underflows back to maximum unsigned long correctly. */
 	@Test
 	public void testDEC_DATunderflow() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(0L);
@@ -180,6 +188,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertEquals("Data does not match", 2222L + 3333L, getData(2));
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testADD_DATunbounded() throws ExecutionException {
 		codeByteBuffer.put(OpCode.ADD_DAT.value).putInt(9999).putInt(3);
@@ -191,6 +200,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testADD_DATunbounded2() throws ExecutionException {
 		codeByteBuffer.put(OpCode.ADD_DAT.value).putInt(2).putInt(9999);
@@ -202,6 +212,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that adding to an unsigned long value overflows correctly. */
 	@Test
 	public void testADD_DAToverflow() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(0x7fffffffffffffffL);
@@ -246,8 +257,6 @@ public class DataOpCodeTests extends ExecutableTest {
 
 	@Test
 	public void testDIV_DAT() throws ExecutionException {
-		// Note: fatal error because error handler not set
-
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(2222L);
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(3).putLong(3333L);
 		codeByteBuffer.put(OpCode.DIV_DAT.value).putInt(3).putInt(2);
@@ -260,10 +269,23 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertEquals("Data does not match", (3333L / 2222L), getData(3));
 	}
 
+	/** Check divide-by-zero throws fatal error because error handler not set. */
+	@Test
+	public void testDIV_DATzero() throws ExecutionException {
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(0L);
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(3).putLong(3333L);
+		codeByteBuffer.put(OpCode.DIV_DAT.value).putInt(3).putInt(0);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.getIsFinished());
+		assertTrue(state.getHadFatalError());
+	}
+
+	/** Check divide-by-zero is non-fatal because error handler is set. */
 	@Test
 	public void testDIV_DATzeroWithOnError() throws ExecutionException {
-		// Note: non-fatal error because error handler IS set
-
 		int errorAddr = 0x29;
 
 		codeByteBuffer.put(OpCode.ERR_ADR.value).putInt(errorAddr);
@@ -275,6 +297,7 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		// errorAddr:
 		assertEquals(errorAddr, codeByteBuffer.position());
+		// Set 1 at address 1 to indicate we handled error OK
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1L);
 		codeByteBuffer.put(OpCode.FIN_IMD.value);
 
@@ -348,7 +371,9 @@ public class DataOpCodeTests extends ExecutableTest {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(3).putLong(3333L);
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(4).putLong(4444L);
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(5).putLong(5555L);
-		// @(6) = $($0) aka $(3) aka 3333
+		// Set address 6 to the value stored in the address pointed to in address 0.
+		// So, address 0 contains '3', which means use the value stored in address '3',
+		// and address '3' contains 3333L so save this into address 6.
 		codeByteBuffer.put(OpCode.SET_IND.value).putInt(6).putInt(0);
 		codeByteBuffer.put(OpCode.FIN_IMD.value);
 
@@ -359,6 +384,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertEquals("Data does not match", 3333L, getData(6));
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testSET_INDunbounded() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(3L);
@@ -377,6 +403,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testSET_INDunbounded2() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(9999L);
@@ -415,6 +442,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertEquals("Data does not match", 4444L, getData(0));
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testSET_IDXunbounded() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1111L);
@@ -434,6 +462,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testSET_IDXunbounded2() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1111L);
@@ -453,6 +482,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testSET_IDXunbounded3() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1111L);
@@ -472,6 +502,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testSET_IDXunbounded4() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1111L);
@@ -510,6 +541,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertEquals("Data does not match", 5555L, getData(3));
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testIND_DATDunbounded() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(3L);
@@ -528,6 +560,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testIND_DATDunbounded2() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(9999L);
@@ -566,6 +599,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertEquals("Data does not match", 5555L, getData(4));
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testIDX_DATunbounded() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1111L);
@@ -585,6 +619,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testIDX_DATunbounded2() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1111L);
@@ -604,6 +639,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testIDX_DATunbounded3() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1111L);
@@ -623,6 +659,7 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getHadFatalError());
 	}
 
+	/** Check that trying to use an address outside data segment throws a fatal error. */
 	@Test
 	public void testIDX_DATunbounded4() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1111L);
@@ -656,10 +693,23 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertEquals("Data does not match", 2222L % 3333L, getData(2));
 	}
 
+	/** Check divide-by-zero throws fatal error because error handler not set. */
+	@Test
+	public void testMOD_DATzero() throws ExecutionException {
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(0L);
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(3).putLong(3333L);
+		codeByteBuffer.put(OpCode.MOD_DAT.value).putInt(2).putInt(0);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.getIsFinished());
+		assertTrue(state.getHadFatalError());
+	}
+
+	/** Check divide-by-zero is non-fatal because error handler is set. */
 	@Test
 	public void testMOD_DATzeroWithOnError() throws ExecutionException {
-		// Note: non-fatal error because error handler IS set
-
 		int errorAddr = 0x29;
 
 		codeByteBuffer.put(OpCode.ERR_ADR.value).putInt(errorAddr);
@@ -671,6 +721,7 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		// errorAddr:
 		assertEquals(errorAddr, codeByteBuffer.position());
+		// Set 1 at address 1 to indicate we handled error OK
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1L);
 		codeByteBuffer.put(OpCode.FIN_IMD.value);
 

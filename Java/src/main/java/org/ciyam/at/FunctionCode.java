@@ -114,6 +114,44 @@ public enum FunctionCode {
 		}
 	},
 	/**
+	 * <tt>0x0108</tt><br>
+	 * Copies A into addr to addr+3
+	 */
+	GET_A_IND(0x0108, 1, false) {
+		@Override
+		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
+			// Validate data offset in arg1
+			if (functionData.value1 < 0L || functionData.value1 > Integer.MAX_VALUE || functionData.value1 >= state.numDataPages - 3)
+				throw new ExecutionException(this.name() + " data start address out of bounds");
+
+			int dataIndex = (int) (functionData.value1 & 0x7fffffffL);
+
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.a1);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.a2);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.a3);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.a4);
+		}
+	},
+	/**
+	 * <tt>0x0108</tt><br>
+	 * Copies B into addr to addr+3
+	 */
+	GET_B_IND(0x0109, 1, false) {
+		@Override
+		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
+			// Validate data offset in arg1
+			if (functionData.value1 < 0L || functionData.value1 > Integer.MAX_VALUE || functionData.value1 >= state.numDataPages - 3)
+				throw new ExecutionException(this.name() + " data start address out of bounds");
+
+			int dataIndex = (int) (functionData.value1 & 0x7fffffffL);
+
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.b1);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.b2);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.b3);
+			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.b4);
+		}
+	},
+	/**
 	 * Set A1<br>
 	 * <tt>0x0110 value</tt>
 	 */
@@ -235,6 +273,44 @@ public enum FunctionCode {
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
 			state.b3 = functionData.value1;
 			state.b4 = functionData.value2;
+		}
+	},
+	/**
+	 * <tt>0x0108</tt><br>
+	 * Copies addr to addr+3 into A
+	 */
+	SET_A_IND(0x011c, 1, false) {
+		@Override
+		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
+			// Validate data offset in arg1
+			if (functionData.value1 < 0L || functionData.value1 > Integer.MAX_VALUE || functionData.value1 >= state.numDataPages - 3)
+				throw new ExecutionException(this.name() + " data start address out of bounds");
+
+			int dataIndex = (int) (functionData.value1 & 0x7fffffffL);
+
+			state.a1 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.a2 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.a3 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.a4 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+		}
+	},
+	/**
+	 * <tt>0x0108</tt><br>
+	 * Copies addr to addr+3 into B
+	 */
+	SET_B_IND(0x011d, 1, false) {
+		@Override
+		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
+			// Validate data offset in arg1
+			if (functionData.value1 < 0L || functionData.value1 > Integer.MAX_VALUE || functionData.value1 >= state.numDataPages - 3)
+				throw new ExecutionException(this.name() + " data start address out of bounds");
+
+			int dataIndex = (int) (functionData.value1 & 0x7fffffffL);
+
+			state.b1 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.b2 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.b3 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
+			state.b4 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
 		}
 	},
 	/**
@@ -720,21 +796,21 @@ public enum FunctionCode {
 	 * <tt>0x0303</tt><br>
 	 * Put previous block's hash in A
 	 */
-	PUT_PREVIOUS_BLOCK_HASH_IN_A(0x0303, 0, false) {
+	PUT_PREVIOUS_BLOCK_HASH_INTO_A(0x0303, 0, false) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			state.getAPI().putPreviousBlockHashInA(state);
+			state.getAPI().putPreviousBlockHashIntoA(state);
 		}
 	},
 	/**
 	 * <tt>0x0304</tt><br>
-	 * Put transaction after timestamp in A, or zero if none<br>
+	 * Put transaction (to this AT) after timestamp in A, or zero if none<br>
 	 * a-k-a "A_To_Tx_After_Timestamp"
 	 */
-	PUT_TX_AFTER_TIMESTAMP_IN_A(0x0304, 1, false) {
+	PUT_TX_AFTER_TIMESTAMP_INTO_A(0x0304, 1, false) {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
-			state.getAPI().putTransactionAfterTimestampInA(new Timestamp(functionData.value1), state);
+			state.getAPI().putTransactionAfterTimestampIntoA(new Timestamp(functionData.value1), state);
 		}
 	},
 	/**
@@ -854,7 +930,7 @@ public enum FunctionCode {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
 			// Reduce amount to current balance if insufficient funds to pay full amount in value1
-			long amount = Math.max(state.getCurrentBalance(), functionData.value1);
+			long amount = Math.min(state.getCurrentBalance(), functionData.value1);
 
 			// Actually pay
 			state.getAPI().payAmountToB(amount, state);
@@ -890,7 +966,7 @@ public enum FunctionCode {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
 			// Reduce amount to previous balance if insufficient funds to pay previous balance amount
-			long amount = Math.max(state.getCurrentBalance(), state.getPreviousBalance());
+			long amount = Math.min(state.getCurrentBalance(), state.getPreviousBalance());
 
 			// Actually pay
 			state.getAPI().payAmountToB(amount, state);
@@ -1003,11 +1079,11 @@ public enum FunctionCode {
 	// TODO: public abstract String disassemble();
 
 	protected byte[] getHashData(FunctionData functionData, MachineState state) throws ExecutionException {
-		// Validate data offset in A1
+		// Validate data offset in arg1
 		if (functionData.value1 < 0L || functionData.value1 > Integer.MAX_VALUE || functionData.value1 >= state.numDataPages)
 			throw new ExecutionException(this.name() + " data start address out of bounds");
 
-		// Validate data length in A2
+		// Validate data length in arg2
 		if (functionData.value2 < 0L || functionData.value2 > Integer.MAX_VALUE || functionData.value1 + byteLengthToDataLength(functionData.value2) > state.numDataPages)
 			throw new ExecutionException(this.name() + " data length invalid");
 

@@ -88,6 +88,10 @@ public abstract class ExecutableTest {
 			api.bumpCurrentBlockHeight();
 		} while (!onceOnly && !state.getIsFinished());
 
+		unwrapState(state);
+	}
+
+	protected byte[] unwrapState(MachineState state) {
 		// Ready for diagnosis
 		byte[] stateBytes = state.toBytes();
 
@@ -98,11 +102,18 @@ public abstract class ExecutableTest {
 		callStackSize = stateByteBuffer.getInt(CALL_STACK_OFFSET);
 		userStackOffset = CALL_STACK_OFFSET + 4 + callStackSize;
 		userStackSize = stateByteBuffer.getInt(userStackOffset);
+
+		return stateBytes;
 	}
 
 	protected long getData(int address) {
 		int index = DATA_OFFSET + address * MachineState.VALUE_SIZE;
 		return stateByteBuffer.getLong(index);
+	}
+
+	protected void getDataBytes(int address, byte[] dest) {
+		int index = DATA_OFFSET + address * MachineState.VALUE_SIZE;
+		stateByteBuffer.slice().position(index).get(dest);
 	}
 
 	protected int getCallStackPosition() {
