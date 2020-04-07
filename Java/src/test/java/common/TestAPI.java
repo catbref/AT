@@ -61,21 +61,21 @@ public class TestAPI extends API {
 		public long amount;
 		public byte[] message;
 
-		private TestTransaction(byte[] txHash, API.ATTransactionType txType, String creator, String recipient) {
+		private TestTransaction(byte[] txHash, API.ATTransactionType txType, String sender, String recipient) {
 			this.txHash = txHash;
 			this.txType = txType;
-			this.sender = creator;
+			this.sender = sender;
 			this.recipient = recipient;
 		}
 
-		public TestTransaction(byte[] txHash, String creator, String recipient, long amount) {
-			this(txHash, API.ATTransactionType.PAYMENT, creator, recipient);
+		public TestTransaction(byte[] txHash, String sender, String recipient, long amount) {
+			this(txHash, API.ATTransactionType.PAYMENT, sender, recipient);
 
 			this.amount = amount;
 		}
 
-		public TestTransaction(byte[] txHash, String creator, String recipient, byte[] message) {
-			this(txHash, API.ATTransactionType.MESSAGE, creator, recipient);
+		public TestTransaction(byte[] txHash, String sender, String recipient, byte[] message) {
+			this(txHash, API.ATTransactionType.MESSAGE, sender, recipient);
 
 			this.message = new byte[32];
 			System.arraycopy(message, 0, this.message, 0, message.length);
@@ -127,6 +127,21 @@ public class TestAPI extends API {
 		transactions = new HashMap<>();
 	}
 
+	public static byte[] encodeAddress(String address) {
+		byte[] encodedAddress = new byte[32];
+		System.arraycopy(address.getBytes(), 0, encodedAddress, 0, address.length());
+		return encodedAddress;
+	}
+
+	public static String decodeAddress(byte[] encodedAddress) {
+		String address = new String(encodedAddress, StandardCharsets.ISO_8859_1);
+		return address.replace("\0", "");
+	}
+
+	public static String stringifyHash(byte[] hash) {
+		return new String(hash, StandardCharsets.ISO_8859_1);
+	}
+
 	public void bumpCurrentBlockHeight() {
 		++this.currentBlockHeight;
 	}
@@ -138,12 +153,28 @@ public class TestAPI extends API {
 		this.currentBlockHeight = blockHeight;
 	}
 
-	private void generateBlock(boolean withTransactions, boolean includeTransactionToAt) {
-		TestBlock newBlock = new TestBlock();
+	public TestBlock addBlockToChain(TestBlock newBlock) {
 		blockchain.add(newBlock);
+		final int blockHeight = blockchain.size();
+
+		for (int seq = 0; seq < newBlock.transactions.size(); ++seq) {
+			TestTransaction transaction = newBlock.transactions.get(seq);
+
+			// Set transaction timestamp
+			transaction.timestamp = Timestamp.toLong(blockHeight, seq);
+
+			// Add to transactions map
+			transactions.put(stringifyHash(transaction.txHash), transaction);
+		}
+
+		return newBlock;
+	}
+
+	private TestBlock generateBlock(boolean withTransactions, boolean includeTransactionToAt) {
+		TestBlock newBlock = new TestBlock();
 
 		if (!withTransactions)
-			return;
+			return newBlock;
 
 		TestAccount atAccount = accounts.get(AT_ADDRESS);
 		List<TestAccount> senderAccounts = new ArrayList<>(accounts.values());
@@ -160,39 +191,46 @@ public class TestAPI extends API {
 			TestAccount recipient = recipientAccounts.get(RANDOM.nextInt(recipientAccounts.size()));
 			// Pick random transaction type
 			API.ATTransactionType txType = API.ATTransactionType.valueOf(RANDOM.nextInt(2));
-			// Generate tx hash
-			byte[] txHash = new byte[32];
-			RANDOM.nextBytes(txHash);
 
-			TestTransaction transaction;
-			if (txType == API.ATTransactionType.PAYMENT) {
-				long amount = RANDOM.nextInt(100); // small amounts
-				transaction = new TestTransaction(txHash, sender.address, recipient.address, amount);
-			} else {
-				byte[] message = new byte[32];
-				RANDOM.nextBytes(message);
-				transaction = new TestTransaction(txHash, sender.address, recipient.address, message);
-			}
-
-			transaction.timestamp = Timestamp.toLong(blockchain.size(), newBlock.transactions.size());
-			transactions.put(new String(txHash, StandardCharsets.ISO_8859_1), transaction);
+			TestTransaction transaction = generateTransaction(sender.address, recipient.address, txType);
 			newBlock.transactions.add(transaction);
 
 			if (recipient.address.equals(AT_ADDRESS))
 				includesAtTransaction = true;
 		}
+
+		return newBlock;
 	}
 
-	public void generateEmptyBlock() {
-		generateBlock(false, false);
+	public TestBlock generateEmptyBlock() {
+		return generateBlock(false, false);
 	}
 
-	public void generateBlockWithNonAtTransactions() {
-		generateBlock(true, false);
+	public TestBlock generateBlockWithNonAtTransactions() {
+		return generateBlock(true, false);
 	}
 
-	public void generateBlockWithAtTransaction() {
-		generateBlock(true, true);
+	public TestBlock generateBlockWithAtTransaction() {
+		return generateBlock(true, true);
+	}
+
+	public TestTransaction generateTransaction(String sender, String recipient, API.ATTransactionType txType) {
+		TestTransaction transaction;
+
+		// Generate tx hash
+		byte[] txHash = new byte[32];
+		RANDOM.nextBytes(txHash);
+
+		if (txType == API.ATTransactionType.PAYMENT) {
+			long amount = RANDOM.nextInt(100); // small amounts
+			transaction = new TestTransaction(txHash, sender, recipient, amount);
+		} else {
+			byte[] message = new byte[32];
+			RANDOM.nextBytes(message);
+			transaction = new TestTransaction(txHash, sender, recipient, message);
+		}
+
+		return transaction;
 	}
 
 	@Override
@@ -239,7 +277,7 @@ public class TestAPI extends API {
 
 			List<TestTransaction> transactions = block.transactions;
 
-			if (transactionSequence > transactions.size() - 1) {
+			if (transactionSequence >= transactions.size()) {
 				// No more transactions at this height
 				++blockHeight;
 				transactionSequence = 0;
@@ -261,12 +299,13 @@ public class TestAPI extends API {
 		}
 
 		// Nothing found
+		System.out.println("No more transactions found at height " + this.currentBlockHeight);
 		this.setA(state, new byte[32]);
 	}
 
 	public TestTransaction getTransactionFromA(MachineState state) {
 		byte[] aBytes = state.getA();
-		String txHashString = new String(aBytes, StandardCharsets.ISO_8859_1); // ISO_8859_1 for simplistic 8-bit encoding
+		String txHashString = stringifyHash(aBytes);
 		return transactions.get(txHashString);
 	}
 
@@ -323,15 +362,13 @@ public class TestAPI extends API {
 	@Override
 	public void putAddressFromTransactionInAIntoB(MachineState state) {
 		TestTransaction transaction = getTransactionFromA(state);
-		byte[] bBytes = new byte[32];
-		System.arraycopy(transaction.sender.getBytes(), 0, bBytes, 0, transaction.sender.length());
+		byte[] bBytes = encodeAddress(transaction.sender);
 		this.setB(state, bBytes);
 	}
 
 	@Override
 	public void putCreatorAddressIntoB(MachineState state) {
-		byte[] bBytes = new byte[32];
-		System.arraycopy(AT_CREATOR_ADDRESS.getBytes(), 0, bBytes, 0, AT_CREATOR_ADDRESS.length());
+		byte[] bBytes = encodeAddress(AT_CREATOR_ADDRESS);
 		this.setB(state, bBytes);
 	}
 
@@ -348,30 +385,25 @@ public class TestAPI extends API {
 
 	@Override
 	public void payAmountToB(long amount, MachineState state) {
-		if (amount <= 0)
-			return;
-
 		byte[] bBytes = state.getB();
-		String address = new String(bBytes, StandardCharsets.ISO_8859_1);
-		address = address.replace("\0", "");
+		String address = decodeAddress(bBytes);
 
 		TestAccount recipient = accounts.get(address);
 		if (recipient == null)
 			throw new IllegalStateException("Refusing to pay to unknown account: " + address);
 
-		System.out.println(String.format("Paid %s to %s, their balance now: %s", prettyAmount(amount), recipient.address, recipient.balance));
 		recipient.balance += amount;
+		System.out.println(String.format("Paid %s to '%s', their balance now: %s", prettyAmount(amount), recipient.address, prettyAmount(recipient.balance)));
 
-		TestAccount atAccount = accounts.get(AT_ADDRESS);
-		atAccount.balance -= amount;
-		System.out.println(String.format("AT balance now: %s", atAccount.balance));
+		final long previousBalance = state.getCurrentBalance();
+		final long newBalance = previousBalance - amount;
+		System.out.println(String.format("AT balance was %s, now: %s", prettyAmount(previousBalance), prettyAmount(newBalance)));
 	}
 
 	@Override
 	public void messageAToB(MachineState state) {
 		byte[] bBytes = state.getB();
-		String address = new String(bBytes, StandardCharsets.ISO_8859_1);
-		address = address.replace("\0", "");
+		String address = decodeAddress(bBytes);
 
 		TestAccount recipient = accounts.get(address);
 		if (recipient == null)
@@ -382,7 +414,7 @@ public class TestAPI extends API {
 
 	@Override
 	public long addMinutesToTimestamp(Timestamp timestamp, long minutes, MachineState state) {
-		timestamp.blockHeight = ((int) minutes * 60) / BLOCK_PERIOD;
+		timestamp.blockHeight += ((int) minutes * 60) / BLOCK_PERIOD;
 		return timestamp.longValue();
 	}
 
@@ -392,7 +424,7 @@ public class TestAPI extends API {
 
 		TestAccount atCreatorAccount = accounts.get(AT_CREATOR_ADDRESS);
 		atCreatorAccount.balance += amount;
-		System.out.println(String.format("Paid %s to creator %s, their balance now: %s", prettyAmount(amount), atCreatorAccount.address, atCreatorAccount.balance));
+		System.out.println(String.format("Paid %s to AT creator '%s', their balance now: %s", prettyAmount(amount), atCreatorAccount.address, prettyAmount(atCreatorAccount.balance)));
 
 		accounts.get(AT_ADDRESS).balance -= amount;
 	}
