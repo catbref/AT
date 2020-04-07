@@ -237,7 +237,7 @@ public class MachineState {
 		this.frozenBalance = null;
 		this.isFinished = false;
 		this.hadFatalError = false;
-		this.previousBalance = 0;
+		this.previousBalance = this.api.getCurrentBalance(this); // Initial previousBalance is deployment balance
 
 		// If we have a minimum activation amount then create AT in frozen state, requiring that amount to unfreeze.
 		// If creator also sends funds with creation then AT will unfreeze on first call.
@@ -409,8 +409,7 @@ public class MachineState {
 		this.currentBalance = currentBalance;
 	}
 
-	// For FunctionCode use
-	/* package */ long getPreviousBalance() {
+	public long getPreviousBalance() {
 		return this.previousBalance;
 	}
 
