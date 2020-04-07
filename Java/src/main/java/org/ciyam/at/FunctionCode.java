@@ -114,8 +114,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0108</tt><br>
-	 * Copies A into addr to addr+3
+	 * Copies A into addr to addr+3<br>
+	 * <tt>0x0108 addr</tt>
 	 */
 	GET_A_IND(0x0108, 1, false) {
 		@Override
@@ -133,8 +133,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0108</tt><br>
-	 * Copies B into addr to addr+3
+	 * Copies B into addr to addr+3<br>
+	 * <tt>0x0109 addr</tt>
 	 */
 	GET_B_IND(0x0109, 1, false) {
 		@Override
@@ -276,8 +276,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0108</tt><br>
-	 * Copies addr to addr+3 into A
+	 * Copies addr to addr+3 into A<br>
+	 * <tt>0x011c addr</tt>
 	 */
 	SET_A_IND(0x011c, 1, false) {
 		@Override
@@ -295,8 +295,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0108</tt><br>
-	 * Copies addr to addr+3 into B
+	 * Copies addr to addr+3 into B<br>
+	 * <tt>0x011d addr</tt>
 	 */
 	SET_B_IND(0x011d, 1, false) {
 		@Override
@@ -527,7 +527,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * MD5 data into B<br>
-	 * <tt>0x0200 start-addr byte-length</tt>
+	 * <tt>0x0200 start-addr byte-length</tt><br>
 	 * MD5 hash stored in B1 and B2. B3 and B4 are zeroed.
 	 */
 	MD5_INTO_B(0x0200, 2, false) {
@@ -553,7 +553,7 @@ public enum FunctionCode {
 	/**
 	 * Check MD5 of data matches B<br>
 	 * <tt>0x0201 start-addr byte-length</tt><br>
-	 * Other MD5 hash is in B1 and B2. B3 and B4 are ignored.
+	 * Other MD5 hash is in B1 and B2. B3 and B4 are ignored.<br>
 	 * Returns 1 if true, 0 if false
 	 */
 	CHECK_MD5_WITH_B(0x0201, 2, true) {
@@ -583,7 +583,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * RIPE-MD160 data into B<br>
-	 * <tt>0x0202 start-addr byte-length</tt>
+	 * <tt>0x0202 start-addr byte-length</tt><br>
 	 * RIPE-MD160 hash stored in LSB of B1 and all of B2 and B3. B4 is zeroed.
 	 */
 	RMD160_INTO_B(0x0202, 2, false) {
@@ -609,7 +609,7 @@ public enum FunctionCode {
 	/**
 	 * Check RIPE-MD160 of data matches B<br>
 	 * <tt>0x0203 start-addr byte-length</tt><br>
-	 * Other RIPE-MD160 hash is in LSB of B1 and all of B2 and B3. B4 is ignored.
+	 * Other RIPE-MD160 hash is in LSB of B1 and all of B2 and B3. B4 is ignored.<br>
 	 * Returns 1 if true, 0 if false
 	 */
 	CHECK_RMD160_WITH_B(0x0203, 2, true) {
@@ -641,7 +641,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * SHA256 data into B<br>
-	 * <tt>0x0204 start-addr byte-length</tt>
+	 * <tt>0x0204 start-addr byte-length</tt><br>
 	 * SHA256 hash is stored in B1 through B4.
 	 */
 	SHA256_INTO_B(0x0204, 2, false) {
@@ -667,7 +667,7 @@ public enum FunctionCode {
 	/**
 	 * Check SHA256 of data matches B<br>
 	 * <tt>0x0205 start-addr byte-length</tt><br>
-	 * Other SHA256 hash is in B1 through B4.
+	 * Other SHA256 hash is in B1 through B4.<br>
 	 * Returns 1 if true, 0 if false
 	 */
 	CHECK_SHA256_WITH_B(0x0205, 2, true) {
@@ -699,7 +699,7 @@ public enum FunctionCode {
 	},
 	/**
 	 * HASH160 data into B<br>
-	 * <tt>0x0206 start-addr byte-length</tt>
+	 * <tt>0x0206 start-addr byte-length</tt><br>
 	 * Bitcoin's HASH160 hash is equivalent to RMD160(SHA256(data)).<br>
 	 * HASH160 hash stored in LSB of B1 and all of B2 and B3. B4 is zeroed.
 	 */
@@ -793,8 +793,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0303</tt><br>
-	 * Put previous block's hash in A
+	 * Put previous block's hash in A<br>
+	 * <tt>0x0303</tt>
 	 */
 	PUT_PREVIOUS_BLOCK_HASH_INTO_A(0x0303, 0, false) {
 		@Override
@@ -803,8 +803,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0304</tt><br>
 	 * Put transaction (to this AT) after timestamp in A, or zero if none<br>
+	 * <tt>0x0304 timestamp</tt><br>
 	 * a-k-a "A_To_Tx_After_Timestamp"
 	 */
 	PUT_TX_AFTER_TIMESTAMP_INTO_A(0x0304, 1, false) {
@@ -847,8 +847,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0308</tt><br>
 	 * Generate random number using transaction in A<br>
+	 * <tt>0x0308</tt><br>
 	 * Returns 0xffffffffffffffff in A not valid transaction<br>
 	 * Can sleep to use next block as source of entropy
 	 */
@@ -869,8 +869,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0309</tt><br>
 	 * Put 'message' from transaction in A into B<br>
+	 * <tt>0x0309</tt><br>
 	 * If transaction has no 'message' then zero B<br>
 	 * Example 'message' could be 256-bit shared secret
 	 */
@@ -881,8 +881,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x030a</tt><br>
-	 * Put sender/creator address from transaction in A into B
+	 * Put sender/creator address from transaction in A into B<br>
+	 * <tt>0x030a</tt>
 	 */
 	PUT_ADDRESS_FROM_TX_IN_A_INTO_B(0x030a, 0, false) {
 		@Override
@@ -891,8 +891,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x030b</tt><br>
-	 * Put AT's creator's address into B
+	 * Put AT's creator's address into B<br>
+	 * <tt>0x030b</tt>
 	 */
 	PUT_CREATOR_INTO_B(0x030b, 0, false) {
 		@Override
@@ -922,8 +922,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0402</tt><br>
 	 * Pay fee-inclusive amount to account address in B<br>
+	 * <tt>0x0402 amount</tt><br>
 	 * Reduces amount to current balance rather than failing due to insufficient funds
 	 */
 	PAY_TO_ADDRESS_IN_B(0x0402, 1, false) {
@@ -944,8 +944,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0403</tt><br>
-	 * Pay all remaining funds to account address in B
+	 * Pay all remaining funds to account address in B<br>
+	 * <tt>0x0403</tt>
 	 */
 	PAY_ALL_TO_ADDRESS_IN_B(0x0403, 0, false) {
 		@Override
@@ -958,8 +958,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0404</tt><br>
 	 * Pay previous balance to account address in B<br>
+	 * <tt>0x0404</tt><br>
 	 * Reduces amount to current balance rather than failing due to insufficient funds
 	 */
 	PAY_PREVIOUS_TO_ADDRESS_IN_B(0x0404, 0, false) {
@@ -980,8 +980,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0405</tt><br>
-	 * Send A as a message to address in B
+	 * Send A as a message to address in B<br>
+	 * <tt>0x0405</tt>
 	 */
 	MESSAGE_A_TO_ADDRESS_IN_B(0x0405, 0, false) {
 		@Override
@@ -990,7 +990,8 @@ public enum FunctionCode {
 		}
 	},
 	/**
-	 * <tt>0x0406</tt><br>
+	 * Add minutes to timestamp<br>
+	 * <tt>0x0406 timestamp minutes</tt><br>
 	 * Return 'timestamp' based on passed 'timestamp' plus minutes
 	 */
 	ADD_MINUTES_TO_TIMESTAMP(0x0406, 2, true) {
