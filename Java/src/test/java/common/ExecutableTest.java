@@ -23,6 +23,7 @@ public abstract class ExecutableTest {
 	public int callStackSize;
 	public int userStackOffset;
 	public int userStackSize;
+	public byte[] packedState;
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -36,10 +37,12 @@ public abstract class ExecutableTest {
 		codeByteBuffer = ByteBuffer.allocate(TestUtils.NUM_CODE_PAGES * MachineState.OPCODE_SIZE);
 		dataByteBuffer = ByteBuffer.allocate(TestUtils.NUM_DATA_PAGES * MachineState.VALUE_SIZE);
 		stateByteBuffer = null;
+		packedState = null;
 	}
 
 	@After
 	public void afterTest() {
+		packedState = null;
 		stateByteBuffer = null;
 		codeByteBuffer = null;
 		dataByteBuffer = null;
@@ -52,20 +55,29 @@ public abstract class ExecutableTest {
 		byte[] codeBytes = codeByteBuffer.array();
 		byte[] dataBytes = dataByteBuffer.array();
 
-		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
+		if (packedState == null) {
+			// First time
+			System.out.println("First execution - deploying...");
+			state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
+			packedState = state.toBytes();
+		}
 
 		do {
-			System.out.println("Starting execution:");
+			state = MachineState.fromBytes(api, logger, packedState, codeBytes);
+
+			System.out.println("Starting execution round!");
 			System.out.println("Current block height: " + api.getCurrentBlockHeight());
+			System.out.println("Previous balance: " + TestAPI.prettyAmount(state.getPreviousBalance()));
+			System.out.println("Current balance: " + TestAPI.prettyAmount(state.getCurrentBalance()));
 
 			// Actual execution
 			state.execute();
 
-			System.out.println("After execution:");
+			System.out.println("After execution round:");
 			System.out.println("Steps: " + state.getSteps());
-			System.out.println("Program Counter: " + String.format("%04x", state.getProgramCounter()));
-			System.out.println("Stop Address: " + String.format("%04x", state.getOnStopAddress()));
-			System.out.println("Error Address: " + (state.getOnErrorAddress() == null ? "not set" : String.format("%04x", state.getOnErrorAddress())));
+			System.out.println(String.format("Program Counter: 0x%04x", state.getProgramCounter()));
+			System.out.println(String.format("Stop Address: 0x%04x", state.getOnStopAddress()));
+			System.out.println("Error Address: " + (state.getOnErrorAddress() == null ? "not set" : String.format("0x%04x", state.getOnErrorAddress())));
 
 			if (state.getIsSleeping())
 				System.out.println("Sleeping until current block height (" + state.getCurrentBlockHeight() + ") reaches " + state.getSleepUntilHeight());
@@ -81,11 +93,14 @@ public abstract class ExecutableTest {
 			System.out.println("Frozen: " + state.getIsFrozen());
 
 			long newBalance = state.getCurrentBalance();
-			System.out.println("New balance: " + newBalance);
+			System.out.println("New balance: " + TestAPI.prettyAmount(newBalance));
 			api.setCurrentBalance(newBalance);
 
 			// Bump block height
 			api.bumpCurrentBlockHeight();
+
+			packedState = state.toBytes();
+			System.out.println("Execution round finished\n");
 		} while (!onceOnly && !state.getIsFinished());
 
 		unwrapState(state);
