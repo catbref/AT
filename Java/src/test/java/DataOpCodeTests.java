@@ -771,7 +771,7 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		assertTrue(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
-		assertEquals("Data does not match", 2222L >> 3, getData(2));
+		assertEquals("Data does not match", 2222L >>> 3, getData(2));
 	}
 
 	@Test
@@ -786,6 +786,21 @@ public class DataOpCodeTests extends ExecutableTest {
 		assertTrue(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
 		assertEquals("Data does not match", 0L, getData(2));
+	}
+
+	@Test
+	public void testSHR_DATsign() throws ExecutionException {
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(-1L);
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(3).putLong(3L);
+		codeByteBuffer.put(OpCode.SHR_DAT.value).putInt(2).putInt(3);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.getIsFinished());
+		assertFalse(state.getHadFatalError());
+		assertEquals("Data does not match", -1L >>> 3, getData(2));
+		assertTrue("Sign does not match", getData(2) >= 0);
 	}
 
 }
