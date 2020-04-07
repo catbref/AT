@@ -146,15 +146,23 @@ public class OpCodeTests extends ExecutableTest {
 	@Test
 	public void testSLP_IMD() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SLP_IMD.value);
-		int nextAddress = codeByteBuffer.position();
+		int postSleepAddress = codeByteBuffer.position();
 		codeByteBuffer.put(OpCode.FIN_IMD.value);
+		int postFinishAddress = codeByteBuffer.position();
 
 		execute(true);
 
 		assertTrue(state.getIsSleeping());
 		assertFalse(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
-		assertEquals("Program counter incorrect", nextAddress, state.getProgramCounter());
+		assertEquals("Program counter incorrect", postSleepAddress, state.getProgramCounter());
+
+		execute(true);
+
+		assertFalse(state.getIsSleeping());
+		assertTrue(state.getIsFinished());
+		assertFalse(state.getHadFatalError());
+		assertEquals("Program counter incorrect", postFinishAddress, state.getProgramCounter());
 	}
 
 	@Test
