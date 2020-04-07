@@ -609,7 +609,7 @@ public class MachineState {
 		state.previousBalance = byteBuffer.getLong();
 
 		// Various flags (reverse order to toBytes)
-		Flags flags = state.new Flags(byteBuffer.getInt());
+		Flags flags = new Flags(byteBuffer.getInt());
 		boolean hasNonZeroB = flags.pop();
 		boolean hasNonZeroA = flags.pop();
 		boolean hasFrozenBalance = flags.pop();
@@ -650,7 +650,7 @@ public class MachineState {
 	}
 
 	/** Class for pushing/popping boolean flags onto/from an int */
-	private class Flags {
+	private static class Flags {
 		private int flags;
 
 		public Flags() {
