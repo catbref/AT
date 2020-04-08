@@ -9,6 +9,33 @@ import common.ExecutableTest;
 public class BranchingOpCodeTests extends ExecutableTest {
 
 	@Test
+	public void testBackwardsBranch() throws ExecutionException {
+		int backwardsAddr = 0x05;
+		int forwardAddr = 0x13;
+
+		codeByteBuffer.put(OpCode.JMP_ADR.value).putInt(forwardAddr);
+
+		// backwardsAddr:
+		assertEquals(backwardsAddr, codeByteBuffer.position());
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(2L);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		// forwardAddr:
+		assertEquals(forwardAddr, codeByteBuffer.position());
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(0L);
+		int tempPC = codeByteBuffer.position();
+		codeByteBuffer.put(OpCode.BZR_DAT.value).putInt(0).put((byte) (backwardsAddr - tempPC));
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1L);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.getIsFinished());
+		assertFalse(state.getHadFatalError());
+		assertEquals("Data does not match", 2L, getData(1));
+	}
+
+	@Test
 	public void testBZR_DATtrue() throws ExecutionException {
 		int targetAddr = 0x21;
 

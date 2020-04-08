@@ -194,10 +194,10 @@ public class MachineState {
 	}
 
 	/** For creating a new machine state */
-	public MachineState(byte[] creationBytes) {
-		this(null, null, Arrays.copyOfRange(creationBytes, 0, HEADER_LENGTH));
+	public MachineState(API api, byte[] creationBytes) {
+		this(api, null, Arrays.copyOfRange(creationBytes, 0, HEADER_LENGTH));
 
-		int expectedLength = HEADER_LENGTH + this.numCodePages * this.constants.CODE_PAGE_SIZE + this.numDataPages + this.constants.DATA_PAGE_SIZE;
+		int expectedLength = HEADER_LENGTH + this.numCodePages * this.constants.CODE_PAGE_SIZE + this.numDataPages * this.constants.DATA_PAGE_SIZE;
 		if (creationBytes.length != expectedLength)
 			throw new IllegalArgumentException("Creation bytes length does not match header values");
 
