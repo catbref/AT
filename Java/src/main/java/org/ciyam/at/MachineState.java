@@ -762,10 +762,11 @@ public class MachineState {
 	}
 
 	/** Return disassembly of code bytes */
-	public String disassemble() throws ExecutionException {
+	public static String disassemble(byte[] codeBytes, int dataBufferLength) throws ExecutionException {
 		StringBuilder output = new StringBuilder();
 
-		codeByteBuffer.position(0);
+		ByteBuffer codeByteBuffer = ByteBuffer.wrap(codeBytes);
+		ByteBuffer dataByteBuffer = ByteBuffer.allocate(dataBufferLength);
 
 		while (codeByteBuffer.hasRemaining()) {
 			byte rawOpCode = codeByteBuffer.get();
@@ -779,7 +780,7 @@ public class MachineState {
 			if (output.length() != 0)
 				output.append("\n");
 
-			output.append(String.format("[PC: %04x] %s", codeByteBuffer.position() - 1,nextOpCode.disassemble(codeByteBuffer, dataByteBuffer)));
+			output.append(String.format("[PC: %04x] %s", codeByteBuffer.position() - 1, nextOpCode.disassemble(codeByteBuffer, dataByteBuffer)));
 		}
 
 		return output.toString();

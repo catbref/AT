@@ -457,10 +457,7 @@ public enum OpCode {
 			int address = (int) args[0];
 			byte offset = (byte) args[1];
 
-			int branchTarget = state.getProgramCounter() + offset;
-
-			if (branchTarget < 0 || branchTarget >= state.codeByteBuffer.limit())
-				throw new InvalidAddressException("branch target out of bounds");
+			int branchTarget = calculateBranchTarget(state, offset);
 
 			long value = state.dataByteBuffer.getLong(address);
 
@@ -480,10 +477,7 @@ public enum OpCode {
 			int address = (int) args[0];
 			byte offset = (byte) args[1];
 
-			int branchTarget = state.getProgramCounter() + offset;
-
-			if (branchTarget < 0 || branchTarget >= state.codeByteBuffer.limit())
-				throw new InvalidAddressException("branch target out of bounds");
+			int branchTarget = calculateBranchTarget(state, offset);
 
 			long value = state.dataByteBuffer.getLong(address);
 
@@ -875,13 +869,43 @@ public enum OpCode {
 	 */
 	protected abstract void executeWithParams(MachineState state, Object... args) throws ExecutionException;
 
-	public void execute(MachineState state) throws ExecutionException {
+	/* package */ void execute(MachineState state) throws ExecutionException {
 		List<Object> args = new ArrayList<>();
 
 		for (OpCodeParam param : this.params)
 			args.add(param.fetch(state.codeByteBuffer, state.dataByteBuffer));
 
 		this.executeWithParams(state, args.toArray());
+	}
+
+	public static int calcOffset(ByteBuffer byteBuffer, Integer branchTarget) {
+		if (branchTarget == null)
+			return 0;
+
+		return branchTarget - byteBuffer.position();
+	}
+
+	public byte[] compile(Object... args) throws CompilationException {
+		if (args.length != this.params.length)
+			throw new IllegalArgumentException(String.format("%s requires %d args, only %d passed", this.name(), this.params.length, args.length));
+
+		ByteBuffer byteBuffer = ByteBuffer.allocate(32); // 32 should easily be enough
+
+		byteBuffer.put(this.value);
+
+		for (int i = 0; i < this.params.length; ++i)
+			try {
+				byteBuffer.put(this.params[i].compile(args[i]));
+			} catch (ClassCastException e) {
+				throw new CompilationException(String.format("%s arg[%d] could not coerced to required type", this.name(), i));
+			}
+
+		byteBuffer.flip();
+
+		byte[] bytes = new byte[byteBuffer.limit()];
+		byteBuffer.get(bytes);
+
+		return bytes;
 	}
 
 	/**
@@ -941,16 +965,23 @@ public enum OpCode {
 		int address2 = (int) args[1];
 		byte offset = (byte) args[2];
 
-		int branchTarget = state.getProgramCounter() + offset;
-
-		if (branchTarget < 0 || branchTarget >= state.codeByteBuffer.limit())
-			throw new InvalidAddressException("branch target out of bounds");
+		int branchTarget = calculateBranchTarget(state, offset);
 
 		long value1 = state.dataByteBuffer.getLong(address1);
 		long value2 = state.dataByteBuffer.getLong(address2);
 
 		if (comparator.compare(value1, value2))
 			state.codeByteBuffer.position(branchTarget);
+	}
+
+	protected int calculateBranchTarget(MachineState state, byte offset) throws ExecutionException {
+		final int branchTarget = state.getProgramCounter() + offset;
+
+		if (branchTarget < 0 || branchTarget >= state.codeByteBuffer.limit())
+			throw new InvalidAddressException(String.format("%s code target PC(%04x) + %02x = %04x out of bounds: 0x0000 to 0x%04x",
+					this.name(), state.getProgramCounter(), offset, branchTarget, state.codeByteBuffer.limit() - 1));
+
+		return branchTarget;
 	}
 
 }

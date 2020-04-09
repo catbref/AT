@@ -15,44 +15,20 @@ import org.junit.Test;
 
 public class SerializationTests extends ExecutableTest {
 
-	private byte[] simulate() {
-		byte[] headerBytes = TestUtils.HEADER_BYTES;
-		byte[] codeBytes = codeByteBuffer.array();
-		byte[] dataBytes = new byte[0];
+	@Test
+	public void testIntToByteArray() {
+		byte[] expectedBytes = hexToBytes("fedcba98");
+		byte[] actualBytes = MachineState.toByteArray(0xfedcba98);
 
-		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
-
-		return executeAndCheck(state);
+		assertTrue(Arrays.equals(expectedBytes, actualBytes));
 	}
 
-	private byte[] continueSimulation(byte[] savedState) {
-		byte[] codeBytes = codeByteBuffer.array();
-		state = MachineState.fromBytes(api, logger, savedState, codeBytes);
+	@Test
+	public void testLongToByteArray() {
+		byte[] expectedBytes = hexToBytes("fedcba9876543210");
+		byte[] actualBytes = MachineState.toByteArray(0xfedcba9876543210L);
 
-		// Pretend we're on next block
-		api.bumpCurrentBlockHeight();
-
-		return executeAndCheck(state);
-	}
-
-	private byte[] executeAndCheck(MachineState state) {
-		state.execute();
-
-		// Fetch current state, and code bytes
-		byte[] stateBytes = unwrapState(state);
-		byte[] codeBytes = state.getCodeBytes();
-
-		// Rebuild new MachineState using fetched state & bytes
-		MachineState restoredState = MachineState.fromBytes(api, logger, stateBytes, codeBytes);
-		// Extract rebuilt state and code bytes
-		byte[] restoredStateBytes = restoredState.toBytes();
-		byte[] restoredCodeBytes = state.getCodeBytes();
-
-		// Check that both states and bytes match
-		assertTrue("Serialization->Deserialization->Reserialization error", Arrays.equals(stateBytes, restoredStateBytes));
-		assertTrue("Serialization->Deserialization->Reserialization error", Arrays.equals(codeBytes, restoredCodeBytes));
-
-		return stateBytes;
+		assertTrue(Arrays.equals(expectedBytes, actualBytes));
 	}
 
 	/** Test serialization of state with stop address. */
@@ -135,6 +111,46 @@ public class SerializationTests extends ExecutableTest {
 		byte[] packedRestoredSate = restoredState.toBytes();
 
 		assertTrue(Arrays.equals(packedState, packedRestoredSate));
+	}
+
+	private byte[] simulate() {
+		byte[] headerBytes = TestUtils.HEADER_BYTES;
+		byte[] codeBytes = codeByteBuffer.array();
+		byte[] dataBytes = new byte[0];
+
+		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
+
+		return executeAndCheck(state);
+	}
+
+	private byte[] continueSimulation(byte[] savedState) {
+		byte[] codeBytes = codeByteBuffer.array();
+		state = MachineState.fromBytes(api, logger, savedState, codeBytes);
+
+		// Pretend we're on next block
+		api.bumpCurrentBlockHeight();
+
+		return executeAndCheck(state);
+	}
+
+	private byte[] executeAndCheck(MachineState state) {
+		state.execute();
+
+		// Fetch current state, and code bytes
+		byte[] stateBytes = unwrapState(state);
+		byte[] codeBytes = state.getCodeBytes();
+
+		// Rebuild new MachineState using fetched state & bytes
+		MachineState restoredState = MachineState.fromBytes(api, logger, stateBytes, codeBytes);
+		// Extract rebuilt state and code bytes
+		byte[] restoredStateBytes = restoredState.toBytes();
+		byte[] restoredCodeBytes = state.getCodeBytes();
+
+		// Check that both states and bytes match
+		assertTrue("Serialization->Deserialization->Reserialization error", Arrays.equals(stateBytes, restoredStateBytes));
+		assertTrue("Serialization->Deserialization->Reserialization error", Arrays.equals(codeBytes, restoredCodeBytes));
+
+		return stateBytes;
 	}
 
 }

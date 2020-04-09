@@ -17,9 +17,9 @@ interface Utils {
 	 */
 	static FunctionCode getFunctionCode(ByteBuffer codeByteBuffer) throws CodeSegmentException, IllegalFunctionCodeException {
 		try {
-			int rawFunctionCode = codeByteBuffer.getShort();
+			final int rawFunctionCode = codeByteBuffer.getShort();
 
-			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
+			final FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
 
 			if (functionCode == null)
 				throw new IllegalFunctionCodeException("Unknown function code");
@@ -44,7 +44,7 @@ interface Utils {
 	 */
 	static int getCodeAddress(ByteBuffer codeByteBuffer) throws CodeSegmentException, InvalidAddressException {
 		try {
-			int address = codeByteBuffer.getInt();
+			final int address = codeByteBuffer.getInt();
 
 			if (address < 0 || address > MachineState.MAX_CODE_ADDRESS || address >= codeByteBuffer.limit())
 				throw new InvalidAddressException("Code address out of bounds");
@@ -69,7 +69,7 @@ interface Utils {
 	 */
 	static int getDataAddress(ByteBuffer codeByteBuffer, ByteBuffer dataByteBuffer) throws CodeSegmentException, InvalidAddressException {
 		try {
-			int address = codeByteBuffer.getInt() * MachineState.VALUE_SIZE;
+			final int address = codeByteBuffer.getInt() * MachineState.VALUE_SIZE;
 
 			if (address < 0 || address + MachineState.VALUE_SIZE >= dataByteBuffer.limit())
 				throw new InvalidAddressException("Data address out of bounds");
@@ -90,18 +90,11 @@ interface Utils {
 	 * @param codeByteBuffer
 	 * @return byte offset
 	 * @throws CodeSegmentException if we ran out of bytes trying to fetch offset
-	 * @throws InvalidAddressException if position + offset is outside of code segment
 	 */
 	static byte getCodeOffset(ByteBuffer codeByteBuffer) throws CodeSegmentException, InvalidAddressException {
 		try {
-			final byte offset = codeByteBuffer.get();
-			final int target = codeByteBuffer.position() + offset;
-
-			if (target < 0 || target >= codeByteBuffer.limit())
-				throw new InvalidAddressException(String.format("Code target PC(%04x) + %02x = %04x out of bounds: 0x0000 to 0x%04x",
-						codeByteBuffer.position() - 1, offset, target, codeByteBuffer.limit() - 1));
-
-			return offset;
+			// We can't do bounds checking here as we don't have access to program counter.
+			return codeByteBuffer.get();
 		} catch (BufferUnderflowException e) {
 			throw new CodeSegmentException("No code bytes left to get code offset", e);
 		}

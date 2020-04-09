@@ -49,13 +49,10 @@ public class DisassemblyTests extends ExecutableTest {
 
 		codeByteBuffer.put(OpCode.FIN_IMD.value);
 
-		byte[] headerBytes = TestUtils.HEADER_BYTES;
-		byte[] codeBytes = codeByteBuffer.array();
-		byte[] dataBytes = dataByteBuffer.array();
+		byte[] codeBytes = TestUtils.getBytes(codeByteBuffer);
+		int dataBufferLength = dataByteBuffer.position();
 
-		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
-
-		System.out.println(state.disassemble());
+		System.out.println(MachineState.disassemble(codeBytes, dataBufferLength));
 	}
 
 	@Test
@@ -64,16 +61,11 @@ public class DisassemblyTests extends ExecutableTest {
 
 		byte[] randomCode = new byte[200];
 		random.nextBytes(randomCode);
-		codeByteBuffer.put(randomCode);
 
-		byte[] headerBytes = TestUtils.HEADER_BYTES;
-		byte[] codeBytes = codeByteBuffer.array();
-		byte[] dataBytes = dataByteBuffer.array();
-
-		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
+		int dataBufferLength = 1024;
 
 		try {
-			System.out.println(state.disassemble());
+			System.out.println(MachineState.disassemble(randomCode, dataBufferLength));
 		} catch (ExecutionException e) {
 			// we expect this to fail
 			return;

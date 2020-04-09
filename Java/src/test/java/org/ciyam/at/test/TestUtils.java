@@ -56,4 +56,12 @@ public class TestUtils {
 		return byteBuffer.array();
 	}
 
+	public static byte[] getBytes(ByteBuffer byteBuffer) {
+		byteBuffer.flip();
+		byte[] bytes = new byte[byteBuffer.limit()];
+		byteBuffer.get(bytes);
+		byteBuffer.clear();
+		return bytes;
+	}
+
 }
