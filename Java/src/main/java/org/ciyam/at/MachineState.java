@@ -204,7 +204,7 @@ public class MachineState {
 		System.arraycopy(creationBytes, HEADER_LENGTH, this.codeByteBuffer.array(), 0, this.numCodePages * this.constants.CODE_PAGE_SIZE);
 
 		System.arraycopy(creationBytes, HEADER_LENGTH + this.numCodePages * this.constants.CODE_PAGE_SIZE, this.dataByteBuffer.array(), 0,
-				this.numDataPages + this.constants.DATA_PAGE_SIZE);
+				this.numDataPages * this.constants.DATA_PAGE_SIZE);
 
 		commonFinalConstruction();
 	}
