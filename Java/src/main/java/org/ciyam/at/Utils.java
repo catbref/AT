@@ -3,7 +3,7 @@ package org.ciyam.at;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-public class Utils {
+interface Utils {
 
 	/**
 	 * Returns immediate function code enum from code bytes at current position.
@@ -11,11 +11,11 @@ public class Utils {
 	 * Initial position is <tt>codeByteBuffer.position()</tt> but on return is incremented by 2.
 	 * 
 	 * @param codeByteBuffer
-	 * @return FunctionCode enum
-	 * @throws CodeSegmentException
-	 * @throws InvalidAddressException
+	 * @return FunctionCode
+	 * @throws CodeSegmentException if we ran out of bytes trying to fetch raw function code value
+	 * @throws IllegalFunctionCodeException if we can't convert raw function code to FunctionCode object
 	 */
-	public static FunctionCode getFunctionCode(ByteBuffer codeByteBuffer) throws CodeSegmentException, IllegalFunctionCodeException {
+	static FunctionCode getFunctionCode(ByteBuffer codeByteBuffer) throws CodeSegmentException, IllegalFunctionCodeException {
 		try {
 			int rawFunctionCode = codeByteBuffer.getShort();
 
@@ -38,11 +38,11 @@ public class Utils {
 	 * <b>Note:</b> address is not scaled by <tt>Constants.VALUE_SIZE</tt> unlike other methods in this class.
 	 * 
 	 * @param codeByteBuffer
-	 * @return int address into code bytes
-	 * @throws CodeSegmentException
-	 * @throws InvalidAddressException
+	 * @return int address into code segment
+	 * @throws CodeSegmentException if we ran out of bytes trying to fetch code address
+	 * @throws InvalidAddressException if fetched address points outside of code segment
 	 */
-	public static int getCodeAddress(ByteBuffer codeByteBuffer) throws CodeSegmentException, InvalidAddressException {
+	static int getCodeAddress(ByteBuffer codeByteBuffer) throws CodeSegmentException, InvalidAddressException {
 		try {
 			int address = codeByteBuffer.getInt();
 
@@ -63,11 +63,11 @@ public class Utils {
 	 * <b>Note:</b> address is returned scaled by <tt>Constants.VALUE_SIZE</tt>.
 	 * 
 	 * @param codeByteBuffer
-	 * @return int address into data bytes
-	 * @throws CodeSegmentException
-	 * @throws InvalidAddressException
+	 * @return int address into data segment
+	 * @throws CodeSegmentException if we ran out of bytes trying to fetch data address
+	 * @throws InvalidAddressException if fetched address points outside of data segment
 	 */
-	public static int getDataAddress(ByteBuffer codeByteBuffer, ByteBuffer dataByteBuffer) throws CodeSegmentException, InvalidAddressException {
+	static int getDataAddress(ByteBuffer codeByteBuffer, ByteBuffer dataByteBuffer) throws CodeSegmentException, InvalidAddressException {
 		try {
 			int address = codeByteBuffer.getInt() * MachineState.VALUE_SIZE;
 
@@ -89,17 +89,17 @@ public class Utils {
 	 * 
 	 * @param codeByteBuffer
 	 * @return byte offset
-	 * @throws CodeSegmentException
-	 * @throws InvalidAddressException
+	 * @throws CodeSegmentException if we ran out of bytes trying to fetch offset
+	 * @throws InvalidAddressException if position + offset is outside of code segment
 	 */
-	public static byte getCodeOffset(ByteBuffer codeByteBuffer) throws CodeSegmentException, InvalidAddressException {
+	static byte getCodeOffset(ByteBuffer codeByteBuffer) throws CodeSegmentException, InvalidAddressException {
 		try {
 			final byte offset = codeByteBuffer.get();
 			final int target = codeByteBuffer.position() + offset;
 
-			if (target < 0 || target >= codeByteBuffer.limit() - 1)
-				throw new InvalidAddressException(String.format("Code target PC+%02x=[%04x] out of bounds: 0x0000 to 0x%04x",
-						codeByteBuffer.position() - 1, offset, target, codeByteBuffer.limit() - 1 -1));
+			if (target < 0 || target >= codeByteBuffer.limit())
+				throw new InvalidAddressException(String.format("Code target PC(%04x) + %02x = %04x out of bounds: 0x0000 to 0x%04x",
+						codeByteBuffer.position() - 1, offset, target, codeByteBuffer.limit() - 1));
 
 			return offset;
 		} catch (BufferUnderflowException e) {
@@ -114,10 +114,9 @@ public class Utils {
 	 * 
 	 * @param codeByteBuffer
 	 * @return long value
-	 * @throws CodeSegmentException
-	 * @throws InvalidAddressException
+	 * @throws CodeSegmentException if we ran out of bytes trying to fetch value
 	 */
-	public static long getCodeValue(ByteBuffer codeByteBuffer) throws CodeSegmentException, InvalidAddressException {
+	static long getCodeValue(ByteBuffer codeByteBuffer) throws CodeSegmentException {
 		try {
 			return codeByteBuffer.getLong();
 		} catch (BufferUnderflowException e) {

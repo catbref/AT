@@ -304,7 +304,7 @@ public class TestAPI extends API {
 	}
 
 	public TestTransaction getTransactionFromA(MachineState state) {
-		byte[] aBytes = state.getA();
+		byte[] aBytes = this.getA(state);
 		String txHashString = stringifyHash(aBytes);
 		return transactions.get(txHashString);
 	}
@@ -346,7 +346,7 @@ public class TestAPI extends API {
 			System.out.println("generateRandomUsingTransactionInA: second call - returning random");
 
 			// HASH(A and new block hash)
-			return (state.getA1() ^ 9L) << 3 ^ (state.getA2() ^ 9L) << 12 ^ (state.getA3() ^ 9L) << 5 ^ (state.getA4() ^ 9L);
+			return (this.getA1(state) ^ 9L) << 3 ^ (this.getA2(state) ^ 9L) << 12 ^ (this.getA3(state) ^ 9L) << 5 ^ (this.getA4(state) ^ 9L);
 		}
 	}
 
@@ -385,7 +385,7 @@ public class TestAPI extends API {
 
 	@Override
 	public void payAmountToB(long amount, MachineState state) {
-		byte[] bBytes = state.getB();
+		byte[] bBytes = this.getB(state);
 		String address = decodeAddress(bBytes);
 
 		TestAccount recipient = accounts.get(address);
@@ -402,14 +402,14 @@ public class TestAPI extends API {
 
 	@Override
 	public void messageAToB(MachineState state) {
-		byte[] bBytes = state.getB();
+		byte[] bBytes = this.getB(state);
 		String address = decodeAddress(bBytes);
 
 		TestAccount recipient = accounts.get(address);
 		if (recipient == null)
 			throw new IllegalStateException("Refusing to send message to unknown account: " + address);
 
-		recipient.messages.add(state.getA());
+		recipient.messages.add(this.getA(state));
 	}
 
 	@Override

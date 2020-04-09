@@ -1,6 +1,7 @@
 package org.ciyam.at;
 
-public interface TwoValueComparator {
+@FunctionalInterface
+interface TwoValueComparator {
 
 	public boolean compare(long a, long b);
 

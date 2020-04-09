@@ -2,7 +2,7 @@ package org.ciyam.at;
 
 import java.nio.ByteBuffer;
 
-public enum OpCodeParam {
+enum OpCodeParam {
 
 	VALUE {
 		@Override

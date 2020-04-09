@@ -100,10 +100,7 @@ public class Timestamp {
 	 * @return CIYAM-AT "timestamp" as long
 	 */
 	public static long toLong(int blockHeight, int transactionSequence) {
-		long longValue = ((long) blockHeight) << 32;
-		// NOP: longValue |= ((long) NATIVE_BLOCKCHAIN_ID) << 24;
-		longValue |= transactionSequence;
-		return longValue;
+		return toLong(blockHeight, NATIVE_BLOCKCHAIN_ID, transactionSequence);
 	}
 
 }

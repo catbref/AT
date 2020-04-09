@@ -1,6 +1,7 @@
 package org.ciyam.at;
 
-public interface TwoValueOperator {
+@FunctionalInterface
+interface TwoValueOperator {
 
 	public long apply(long a, long b);
 

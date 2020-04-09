@@ -329,60 +329,6 @@ public class MachineState {
 		this.hadFatalError = hadFatalError;
 	}
 
-	public long getA1() {
-		return this.a1;
-	}
-
-	public long getA2() {
-		return this.a2;
-	}
-
-	public long getA3() {
-		return this.a3;
-	}
-
-	public long getA4() {
-		return this.a4;
-	}
-
-	public byte[] getA() {
-		ByteBuffer byteBuffer = ByteBuffer.allocate(4 * 8);
-
-		byteBuffer.putLong(this.a1);
-		byteBuffer.putLong(this.a2);
-		byteBuffer.putLong(this.a3);
-		byteBuffer.putLong(this.a4);
-
-		return byteBuffer.array();
-	}
-
-	public long getB1() {
-		return this.b1;
-	}
-
-	public long getB2() {
-		return this.b2;
-	}
-
-	public long getB3() {
-		return this.b3;
-	}
-
-	public long getB4() {
-		return this.b4;
-	}
-
-	public byte[] getB() {
-		ByteBuffer byteBuffer = ByteBuffer.allocate(4 * 8);
-
-		byteBuffer.putLong(this.b1);
-		byteBuffer.putLong(this.b2);
-		byteBuffer.putLong(this.b3);
-		byteBuffer.putLong(this.b4);
-
-		return byteBuffer.array();
-	}
-
 	public int getCurrentBlockHeight() {
 		return this.currentBlockHeight;
 	}

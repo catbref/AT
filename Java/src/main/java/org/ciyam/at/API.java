@@ -152,44 +152,98 @@ public abstract class API {
 
 	/* Convenience methods to allow subclasses to access package-scoped a1-a4, b1-b4 variables */
 
-	public void zeroA(MachineState state) {
+	protected long getA1(MachineState state) {
+		return state.a1;
+	}
+
+	protected long getA2(MachineState state) {
+		return state.a2;
+	}
+
+	protected long getA3(MachineState state) {
+		return state.a3;
+	}
+
+	protected long getA4(MachineState state) {
+		return state.a4;
+	}
+
+	protected byte[] getA(MachineState state) {
+		ByteBuffer byteBuffer = ByteBuffer.allocate(4 * 8);
+
+		byteBuffer.putLong(state.a1);
+		byteBuffer.putLong(state.a2);
+		byteBuffer.putLong(state.a3);
+		byteBuffer.putLong(state.a4);
+
+		return byteBuffer.array();
+	}
+
+	protected long getB1(MachineState state) {
+		return state.b1;
+	}
+
+	protected long getB2(MachineState state) {
+		return state.b2;
+	}
+
+	protected long getB3(MachineState state) {
+		return state.b3;
+	}
+
+	protected long getB4(MachineState state) {
+		return state.b4;
+	}
+
+	protected byte[] getB(MachineState state) {
+		ByteBuffer byteBuffer = ByteBuffer.allocate(4 * 8);
+
+		byteBuffer.putLong(state.b1);
+		byteBuffer.putLong(state.b2);
+		byteBuffer.putLong(state.b3);
+		byteBuffer.putLong(state.b4);
+
+		return byteBuffer.array();
+	}
+
+	protected void zeroA(MachineState state) {
 		state.a1 = 0L;
 		state.a2 = 0L;
 		state.a3 = 0L;
 		state.a4 = 0L;
 	}
 
-	public void zeroB(MachineState state) {
+	protected void zeroB(MachineState state) {
 		state.b1 = 0L;
 		state.b2 = 0L;
 		state.b3 = 0L;
 		state.b4 = 0L;
 	}
 
-	public void setAToMaxValue(MachineState state) {
+	protected void setAToMaxValue(MachineState state) {
 		state.a1 = 0xffffffffffffffffL;
 		state.a2 = 0xffffffffffffffffL;
 		state.a3 = 0xffffffffffffffffL;
 		state.a4 = 0xffffffffffffffffL;
 	}
 
-	public void setA1(MachineState state, long value) {
+	protected void setA1(MachineState state, long value) {
 		state.a1 = value;
 	}
 
-	public void setA2(MachineState state, long value) {
+	protected void setA2(MachineState state, long value) {
 		state.a2 = value;
 	}
 
-	public void setA3(MachineState state, long value) {
+	protected void setA3(MachineState state, long value) {
 		state.a3 = value;
 	}
 
-	public void setA4(MachineState state, long value) {
+	protected void setA4(MachineState state, long value) {
 		state.a4 = value;
 	}
 
-	public void setA(MachineState state, byte[] bytes) {
+	protected void setA(MachineState state, byte[] bytes) {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 
 		state.a1 = byteBuffer.getLong();
@@ -198,23 +252,23 @@ public abstract class API {
 		state.a4 = byteBuffer.getLong();
 	}
 
-	public void setB1(MachineState state, long value) {
+	protected void setB1(MachineState state, long value) {
 		state.b1 = value;
 	}
 
-	public void setB2(MachineState state, long value) {
+	protected void setB2(MachineState state, long value) {
 		state.b2 = value;
 	}
 
-	public void setB3(MachineState state, long value) {
+	protected void setB3(MachineState state, long value) {
 		state.b3 = value;
 	}
 
-	public void setB4(MachineState state, long value) {
+	protected void setB4(MachineState state, long value) {
 		state.b4 = value;
 	}
 
-	public void setB(MachineState state, byte[] bytes) {
+	protected void setB(MachineState state, byte[] bytes) {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 
 		state.b1 = byteBuffer.getLong();

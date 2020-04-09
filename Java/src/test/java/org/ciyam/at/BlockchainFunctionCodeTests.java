@@ -101,7 +101,7 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 
 		byte[] expectedBlockHash = api.blockchain.get(previousBlockHeight - 1).blockHash;
 
-		byte[] aBytes = state.getA();
+		byte[] aBytes = api.getA(state);
 		assertTrue("Block hash mismatch", Arrays.equals(expectedBlockHash, aBytes));
 
 		assertTrue(state.getIsFinished());
