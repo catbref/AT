@@ -121,10 +121,9 @@ public enum FunctionCode {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
 			// Validate data offset in arg1
-			if (functionData.value1 < 0L || functionData.value1 > Integer.MAX_VALUE || functionData.value1 >= state.numDataPages - 3)
-				throw new ExecutionException(this.name() + " data start address out of bounds");
+			checkDataAddress(state, functionData.value1, 4);
 
-			int dataIndex = (int) (functionData.value1 & 0x7fffffffL);
+			int dataIndex = (int) (functionData.value1 & Integer.MAX_VALUE);
 
 			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.a1);
 			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.a2);
@@ -140,10 +139,9 @@ public enum FunctionCode {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
 			// Validate data offset in arg1
-			if (functionData.value1 < 0L || functionData.value1 > Integer.MAX_VALUE || functionData.value1 >= state.numDataPages - 3)
-				throw new ExecutionException(this.name() + " data start address out of bounds");
+			checkDataAddress(state, functionData.value1, 4);
 
-			int dataIndex = (int) (functionData.value1 & 0x7fffffffL);
+			int dataIndex = (int) (functionData.value1 & Integer.MAX_VALUE);
 
 			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.b1);
 			state.dataByteBuffer.putLong(dataIndex++ * MachineState.VALUE_SIZE, state.b2);
@@ -283,10 +281,9 @@ public enum FunctionCode {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
 			// Validate data offset in arg1
-			if (functionData.value1 < 0L || functionData.value1 > Integer.MAX_VALUE || functionData.value1 >= state.numDataPages - 3)
-				throw new ExecutionException(this.name() + " data start address out of bounds");
+			checkDataAddress(state, functionData.value1, 4);
 
-			int dataIndex = (int) (functionData.value1 & 0x7fffffffL);
+			int dataIndex = (int) (functionData.value1 & Integer.MAX_VALUE);
 
 			state.a1 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
 			state.a2 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
@@ -302,10 +299,9 @@ public enum FunctionCode {
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
 			// Validate data offset in arg1
-			if (functionData.value1 < 0L || functionData.value1 > Integer.MAX_VALUE || functionData.value1 >= state.numDataPages - 3)
-				throw new ExecutionException(this.name() + " data start address out of bounds");
+			checkDataAddress(state, functionData.value1, 4);
 
-			int dataIndex = (int) (functionData.value1 & 0x7fffffffL);
+			int dataIndex = (int) (functionData.value1 & Integer.MAX_VALUE);
 
 			state.b1 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
 			state.b2 = state.dataByteBuffer.getLong(dataIndex++ * MachineState.VALUE_SIZE);
@@ -1081,15 +1077,14 @@ public enum FunctionCode {
 
 	protected byte[] getHashData(FunctionData functionData, MachineState state) throws ExecutionException {
 		// Validate data offset in arg1
-		if (functionData.value1 < 0L || functionData.value1 > Integer.MAX_VALUE || functionData.value1 >= state.numDataPages)
-			throw new ExecutionException(this.name() + " data start address out of bounds");
+		checkDataAddress(state, functionData.value1, 1);
 
 		// Validate data length in arg2
-		if (functionData.value2 < 0L || functionData.value2 > Integer.MAX_VALUE || functionData.value1 + byteLengthToDataLength(functionData.value2) > state.numDataPages)
+		if (functionData.value2 < 0L || functionData.value2 > state.numDataPages || functionData.value1 + byteLengthToDataLength(functionData.value2) > state.numDataPages)
 			throw new ExecutionException(this.name() + " data length invalid");
 
-		final int dataStart = (int) (functionData.value1 & 0x7fffffffL);
-		final int dataLength = (int) (functionData.value2 & 0x7fffffffL);
+		final int dataStart = (int) (functionData.value1 & Integer.MAX_VALUE);
+		final int dataLength = (int) (functionData.value2 & Integer.MAX_VALUE);
 
 		byte[] message = new byte[dataLength];
 
@@ -1104,7 +1099,15 @@ public enum FunctionCode {
 
 	/** Returns the number of data-page values to contain specific length of bytes. */
 	protected int byteLengthToDataLength(long byteLength) {
-		return (MachineState.VALUE_SIZE - 1 + (int) (byteLength & 0x7fffffffL)) / MachineState.VALUE_SIZE;
+		return (MachineState.VALUE_SIZE - 1 + (int) (byteLength & Integer.MAX_VALUE)) / MachineState.VALUE_SIZE;
+	}
+
+	/** Check that data segment address (+ subsequent locations) are within data segment bounds. */
+	protected void checkDataAddress(MachineState state, long address, int count) throws ExecutionException {
+		final int maxAddress = state.numDataPages - count;
+
+		if (address < 0L || address > maxAddress)
+			throw new ExecutionException(String.format("%s data address %d out of bounds: 0 to %d", this.name(), address, maxAddress));
 	}
 
 }

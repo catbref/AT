@@ -1,15 +1,18 @@
-import static common.TestUtils.hexToBytes;
+package org.ciyam.at;
+
+import static org.ciyam.at.test.TestUtils.hexToBytes;
+import static org.junit.Assert.fail;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 import org.ciyam.at.ExecutionException;
 import org.ciyam.at.FunctionCode;
 import org.ciyam.at.MachineState;
 import org.ciyam.at.OpCode;
+import org.ciyam.at.test.ExecutableTest;
+import org.ciyam.at.test.TestUtils;
 import org.junit.Test;
-
-import common.ExecutableTest;
-import common.TestUtils;
 
 public class DisassemblyTests extends ExecutableTest {
 
@@ -53,6 +56,30 @@ public class DisassemblyTests extends ExecutableTest {
 		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
 
 		System.out.println(state.disassemble());
+	}
+
+	@Test
+	public void testFuzzyDisassembly() {
+		Random random = new Random();
+
+		byte[] randomCode = new byte[200];
+		random.nextBytes(randomCode);
+		codeByteBuffer.put(randomCode);
+
+		byte[] headerBytes = TestUtils.HEADER_BYTES;
+		byte[] codeBytes = codeByteBuffer.array();
+		byte[] dataBytes = dataByteBuffer.array();
+
+		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
+
+		try {
+			System.out.println(state.disassemble());
+		} catch (ExecutionException e) {
+			// we expect this to fail
+			return;
+		}
+
+		fail("Random code should cause disassembly failure");
 	}
 
 }

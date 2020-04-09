@@ -94,10 +94,12 @@ public class Utils {
 	 */
 	public static byte getCodeOffset(ByteBuffer codeByteBuffer) throws CodeSegmentException, InvalidAddressException {
 		try {
-			byte offset = codeByteBuffer.get();
+			final byte offset = codeByteBuffer.get();
+			final int target = codeByteBuffer.position() + offset;
 
-			if (codeByteBuffer.position() + offset < 0 || codeByteBuffer.position() + offset >= codeByteBuffer.limit())
-				throw new InvalidAddressException("Code offset out of bounds");
+			if (target < 0 || target >= codeByteBuffer.limit() - 1)
+				throw new InvalidAddressException(String.format("Code target PC+%02x=[%04x] out of bounds: 0x0000 to 0x%04x",
+						codeByteBuffer.position() - 1, offset, target, codeByteBuffer.limit() - 1 -1));
 
 			return offset;
 		} catch (BufferUnderflowException e) {

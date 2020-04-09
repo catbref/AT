@@ -1,4 +1,4 @@
-package common;
+package org.ciyam.at.test;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;

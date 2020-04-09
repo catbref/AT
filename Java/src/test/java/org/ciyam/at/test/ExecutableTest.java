@@ -1,4 +1,4 @@
-package common;
+package org.ciyam.at.test;
 
 import java.nio.ByteBuffer;
 import java.security.Security;

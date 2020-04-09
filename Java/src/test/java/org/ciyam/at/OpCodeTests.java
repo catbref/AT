@@ -1,11 +1,12 @@
-import static common.TestUtils.hexToBytes;
+package org.ciyam.at;
+
+import static org.ciyam.at.test.TestUtils.hexToBytes;
 import static org.junit.Assert.*;
 
 import org.ciyam.at.ExecutionException;
 import org.ciyam.at.OpCode;
+import org.ciyam.at.test.ExecutableTest;
 import org.junit.Test;
-
-import common.ExecutableTest;
 
 public class OpCodeTests extends ExecutableTest {
 

@@ -39,7 +39,7 @@ public enum OpCode {
 	 */
 	NOP(0x7f) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) {
+		protected void executeWithParams(MachineState state, Object... args) {
 			// Do nothing
 		}
 	},
@@ -50,7 +50,7 @@ public enum OpCode {
 	 */
 	SET_VAL(0x01, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 			long value = (long) args[1];
 
@@ -64,7 +64,7 @@ public enum OpCode {
 	 */
 	SET_DAT(0x02, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address1 = (int) args[0];
 			int address2 = (int) args[1];
 
@@ -79,7 +79,7 @@ public enum OpCode {
 	 */
 	CLR_DAT(0x03, OpCodeParam.DEST_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			state.dataByteBuffer.putLong(address, 0L);
@@ -92,7 +92,7 @@ public enum OpCode {
 	 */
 	INC_DAT(0x04, OpCodeParam.DEST_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			long value = state.dataByteBuffer.getLong(address);
@@ -106,7 +106,7 @@ public enum OpCode {
 	 */
 	DEC_DAT(0x05, OpCodeParam.DEST_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			long value = state.dataByteBuffer.getLong(address);
@@ -120,7 +120,7 @@ public enum OpCode {
 	 */
 	ADD_DAT(0x06, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeDataOperation(state, (a, b) -> a + b, args);
 		}
 	},
@@ -131,7 +131,7 @@ public enum OpCode {
 	 */
 	SUB_DAT(0x07, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeDataOperation(state, (a, b) -> a - b, args);
 		}
 	},
@@ -142,7 +142,7 @@ public enum OpCode {
 	 */
 	MUL_DAT(0x08, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeDataOperation(state, (a, b) -> a * b, args);
 		}
 	},
@@ -154,7 +154,7 @@ public enum OpCode {
 	 */
 	DIV_DAT(0x09, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			try {
 				executeDataOperation(state, (a, b) -> a / b, args);
 			} catch (ArithmeticException e) {
@@ -169,7 +169,7 @@ public enum OpCode {
 	 */
 	BOR_DAT(0x0a, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeDataOperation(state, (a, b) -> a | b, args);
 		}
 	},
@@ -180,7 +180,7 @@ public enum OpCode {
 	 */
 	AND_DAT(0x0b, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeDataOperation(state, (a, b) -> a & b, args);
 		}
 	},
@@ -191,7 +191,7 @@ public enum OpCode {
 	 */
 	XOR_DAT(0x0c, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeDataOperation(state, (a, b) -> a ^ b, args);
 		}
 	},
@@ -202,7 +202,7 @@ public enum OpCode {
 	 */
 	NOT_DAT(0x0d, OpCodeParam.DEST_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			long value = state.dataByteBuffer.getLong(address);
@@ -216,7 +216,7 @@ public enum OpCode {
 	 */
 	SET_IND(0x0e, OpCodeParam.DEST_ADDR, OpCodeParam.INDIRECT_SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address1 = (int) args[0];
 			int address2 = (int) args[1];
 
@@ -236,7 +236,7 @@ public enum OpCode {
 	 */
 	SET_IDX(0x0f, OpCodeParam.DEST_ADDR, OpCodeParam.INDIRECT_SRC_ADDR_WITH_INDEX, OpCodeParam.INDEX) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address1 = (int) args[0];
 			int address2 = (int) args[1];
 			int address3 = (int) args[2];
@@ -261,7 +261,7 @@ public enum OpCode {
 	 */
 	PSH_DAT(0x10, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			long value = state.dataByteBuffer.getLong(address);
@@ -284,7 +284,7 @@ public enum OpCode {
 	 */
 	POP_DAT(0x11, OpCodeParam.DEST_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			try {
@@ -308,7 +308,7 @@ public enum OpCode {
 	 */
 	JMP_SUB(0x12, OpCodeParam.CODE_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			try {
@@ -331,7 +331,7 @@ public enum OpCode {
 	 */
 	RET_SUB(0x13) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			try {
 				int returnAddress = state.callStackByteBuffer.getInt();
 
@@ -351,7 +351,7 @@ public enum OpCode {
 	 */
 	IND_DAT(0x14, OpCodeParam.INDIRECT_DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address1 = (int) args[0];
 			int address2 = (int) args[1];
 
@@ -371,7 +371,7 @@ public enum OpCode {
 	 */
 	IDX_DAT(0x15, OpCodeParam.INDIRECT_DEST_ADDR_WITH_INDEX, OpCodeParam.INDEX, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address1 = (int) args[0];
 			int address2 = (int) args[1];
 			int address3 = (int) args[2];
@@ -395,7 +395,7 @@ public enum OpCode {
 	 */
 	MOD_DAT(0x16, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			try {
 				executeDataOperation(state, (a, b) -> a % b, args);
 			} catch (ArithmeticException e) {
@@ -412,7 +412,7 @@ public enum OpCode {
 		private static final long MAX_SHIFT = MachineState.VALUE_SIZE * 8L;
 
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			// If 2nd arg is more than value size (in bits) then return 0 to simulate all bits being shifted out of existence
 			executeDataOperation(state, (a, b) -> b >= MAX_SHIFT ? 0 : a << b, args);
 		}
@@ -427,7 +427,7 @@ public enum OpCode {
 		private static final long MAX_SHIFT = MachineState.VALUE_SIZE * 8L;
 
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			// If 2nd arg is more than value size (in bits) then return 0 to simulate all bits being shifted out of existence
 			executeDataOperation(state, (a, b) -> b >= MAX_SHIFT ? 0 : a >>> b, args);
 		}
@@ -439,7 +439,7 @@ public enum OpCode {
 	 */
 	JMP_ADR(0x1a, OpCodeParam.CODE_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			state.codeByteBuffer.position(address);
@@ -453,7 +453,7 @@ public enum OpCode {
 	 */
 	BZR_DAT(0x1b, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 			byte offset = (byte) args[1];
 
@@ -476,7 +476,7 @@ public enum OpCode {
 	 */
 	BNZ_DAT(0x1e, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 			byte offset = (byte) args[1];
 
@@ -499,7 +499,7 @@ public enum OpCode {
 	 */
 	BGT_DAT(0x1f, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeBranchConditional(state, (a, b) -> a > b, args);
 		}
 	},
@@ -511,7 +511,7 @@ public enum OpCode {
 	 */
 	BLT_DAT(0x20, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeBranchConditional(state, (a, b) -> a < b, args);
 		}
 	},
@@ -523,7 +523,7 @@ public enum OpCode {
 	 */
 	BGE_DAT(0x21, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeBranchConditional(state, (a, b) -> a >= b, args);
 		}
 	},
@@ -535,7 +535,7 @@ public enum OpCode {
 	 */
 	BLE_DAT(0x22, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeBranchConditional(state, (a, b) -> a <= b, args);
 		}
 	},
@@ -547,7 +547,7 @@ public enum OpCode {
 	 */
 	BEQ_DAT(0x23, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeBranchConditional(state, (a, b) -> a == b, args);
 		}
 	},
@@ -559,7 +559,7 @@ public enum OpCode {
 	 */
 	BNE_DAT(0x24, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.OFFSET) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			executeBranchConditional(state, (a, b) -> a != b, args);
 		}
 	},
@@ -571,7 +571,7 @@ public enum OpCode {
 	 */
 	SLP_DAT(0x25, OpCodeParam.BLOCK_HEIGHT) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			long value = state.codeByteBuffer.getLong(address);
@@ -587,7 +587,7 @@ public enum OpCode {
 	 */
 	FIZ_DAT(0x26, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			long value = state.dataByteBuffer.getLong(address);
@@ -603,7 +603,7 @@ public enum OpCode {
 	 */
 	STZ_DAT(0x27, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			long value = state.dataByteBuffer.getLong(address);
@@ -621,7 +621,7 @@ public enum OpCode {
 	 */
 	FIN_IMD(0x28) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			state.setIsFinished(true);
 		}
 	},
@@ -632,7 +632,7 @@ public enum OpCode {
 	 */
 	STP_IMD(0x29) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) {
+		protected void executeWithParams(MachineState state, Object... args) {
 			state.setIsStopped(true);
 		}
 	},
@@ -643,7 +643,7 @@ public enum OpCode {
 	 */
 	SLP_IMD(0x2a) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) {
+		protected void executeWithParams(MachineState state, Object... args) {
 			state.setSleepUntilHeight(state.getCurrentBlockHeight() + 1);
 			state.setIsSleeping(true);
 		}
@@ -655,7 +655,7 @@ public enum OpCode {
 	 */
 	ERR_ADR(0x2b, OpCodeParam.CODE_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			int address = (int) args[0];
 
 			state.setOnErrorAddress(address);
@@ -669,7 +669,7 @@ public enum OpCode {
 	 */
 	SET_PCS(0x30) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) {
+		protected void executeWithParams(MachineState state, Object... args) {
 			state.setOnStopAddress(state.codeByteBuffer.position());
 		}
 	},
@@ -680,7 +680,7 @@ public enum OpCode {
 	 */
 	EXT_FUN(0x32, OpCodeParam.FUNC) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 
 			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
@@ -702,7 +702,7 @@ public enum OpCode {
 	 */
 	EXT_FUN_DAT(0x33, OpCodeParam.FUNC, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 			int address = (int) args[1];
 
@@ -727,7 +727,7 @@ public enum OpCode {
 	 */
 	EXT_FUN_DAT_2(0x34, OpCodeParam.FUNC, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 			int address1 = (int) args[1];
 			int address2 = (int) args[2];
@@ -754,7 +754,7 @@ public enum OpCode {
 	 */
 	EXT_FUN_RET(0x35, OpCodeParam.FUNC, OpCodeParam.DEST_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 			int address = (int) args[1];
 
@@ -782,7 +782,7 @@ public enum OpCode {
 	 */
 	EXT_FUN_RET_DAT(0x36, OpCodeParam.FUNC, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 			int address1 = (int) args[1];
 			int address2 = (int) args[2];
@@ -813,7 +813,7 @@ public enum OpCode {
 	 */
 	EXT_FUN_RET_DAT_2(0x37, OpCodeParam.FUNC, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
-		public void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 			int address1 = (int) args[1];
 			int address2 = (int) args[2];
@@ -842,7 +842,7 @@ public enum OpCode {
 	};
 
 	public final byte value;
-	public final OpCodeParam[] params;
+	private final OpCodeParam[] params;
 
 	// Create a map of opcode values to OpCode
 	private static final Map<Byte, OpCode> map = Arrays.stream(OpCode.values()).collect(Collectors.toMap(opcode -> opcode.value, opcode -> opcode));
@@ -873,7 +873,7 @@ public enum OpCode {
 	 * 
 	 * @throws ExecutionException
 	 */
-	public abstract void executeWithParams(MachineState state, Object... args) throws ExecutionException;
+	protected abstract void executeWithParams(MachineState state, Object... args) throws ExecutionException;
 
 	public void execute(MachineState state) throws ExecutionException {
 		List<Object> args = new ArrayList<>();
@@ -914,7 +914,7 @@ public enum OpCode {
 	 *            - typically a lambda operating on two <tt>long</tt> params, e.g. <tt>(a, b) -> a + b</tt>
 	 * @throws ExecutionException
 	 */
-	private static void executeDataOperation(MachineState state, TwoValueOperator operator, Object... args) throws ExecutionException {
+	protected void executeDataOperation(MachineState state, TwoValueOperator operator, Object... args) throws ExecutionException {
 		int address1 = (int) args[0];
 		int address2 = (int) args[1];
 
@@ -936,12 +936,15 @@ public enum OpCode {
 	 *            - typically a lambda comparing two <tt>long</tt> params, e.g. <tt>(a, b) -> a == b</tt>
 	 * @throws ExecutionException
 	 */
-	private static void executeBranchConditional(MachineState state, TwoValueComparator comparator, Object... args) throws ExecutionException {
+	protected void executeBranchConditional(MachineState state, TwoValueComparator comparator, Object... args) throws ExecutionException {
 		int address1 = (int) args[0];
 		int address2 = (int) args[1];
 		byte offset = (byte) args[2];
 
 		int branchTarget = state.getProgramCounter() + offset;
+
+		if (branchTarget < 0 || branchTarget >= state.codeByteBuffer.limit())
+			throw new InvalidAddressException("branch target out of bounds");
 
 		long value1 = state.dataByteBuffer.getLong(address1);
 		long value2 = state.dataByteBuffer.getLong(address2);

@@ -1,3 +1,5 @@
+package org.ciyam.at;
+
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
@@ -9,37 +11,14 @@ import org.ciyam.at.FunctionCode;
 import org.ciyam.at.MachineState;
 import org.ciyam.at.OpCode;
 import org.ciyam.at.Timestamp;
+import org.ciyam.at.test.ExecutableTest;
+import org.ciyam.at.test.TestAPI;
+import org.ciyam.at.test.TestAPI.TestAccount;
+import org.ciyam.at.test.TestAPI.TestBlock;
+import org.ciyam.at.test.TestAPI.TestTransaction;
 import org.junit.Test;
 
-import common.ExecutableTest;
-import common.TestAPI;
-import common.TestAPI.TestAccount;
-import common.TestAPI.TestBlock;
-import common.TestAPI.TestTransaction;
-
 public class BlockchainFunctionCodeTests extends ExecutableTest {
-
-	/**
-	 * GET_BLOCK_TIMESTAMP
-	 * GET_CREATION_TIMESTAMP
-	 * GET_PREVIOUS_BLOCK_TIMESTAMP
-	 * PUT_PREVIOUS_BLOCK_HASH_INTO_A
-	 * PUT_TX_AFTER_TIMESTAMP_INTO_A
-	 * GET_TYPE_FROM_TX_IN_A
-	 * GET_AMOUNT_FROM_TX_IN_A
-	 * GET_TIMESTAMP_FROM_TX_IN_A
-	 * GENERATE_RANDOM_USING_TX_IN_A
-	 * PUT_MESSAGE_FROM_TX_IN_A_INTO_B
-	 * PUT_ADDRESS_FROM_TX_IN_A_INTO_B
-	 * PUT_CREATOR_INTO_B
-	 * GET_CURRENT_BALANCE
-	 * GET_PREVIOUS_BALANCE
-	 * PAY_TO_ADDRESS_IN_B
-	 * PAY_ALL_TO_ADDRESS_IN_B
-	 * PAY_PREVIOUS_TO_ADDRESS_IN_B
-	 * MESSAGE_A_TO_ADDRESS_IN_B
-	 * ADD_MINUTES_TO_TIMESTAMP
-	 */
 
 	@Test
 	public void testGetBlockTimestamp() throws ExecutionException {

@@ -1,4 +1,4 @@
-package common;
+package org.ciyam.at.test;
 
 import org.ciyam.at.LoggerInterface;
 

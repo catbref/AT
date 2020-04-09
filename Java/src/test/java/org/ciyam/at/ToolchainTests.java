@@ -1,4 +1,6 @@
-import static common.TestUtils.hexToBytes;
+package org.ciyam.at;
+
+import static org.ciyam.at.test.TestUtils.hexToBytes;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;

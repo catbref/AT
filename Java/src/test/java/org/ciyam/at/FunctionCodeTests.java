@@ -1,3 +1,5 @@
+package org.ciyam.at;
+
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
@@ -7,9 +9,8 @@ import org.ciyam.at.FunctionCode;
 import org.ciyam.at.MachineState;
 import org.ciyam.at.OpCode;
 import org.ciyam.at.Timestamp;
+import org.ciyam.at.test.ExecutableTest;
 import org.junit.Test;
-
-import common.ExecutableTest;
 
 public class FunctionCodeTests extends ExecutableTest {
 

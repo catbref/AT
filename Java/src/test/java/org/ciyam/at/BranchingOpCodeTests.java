@@ -1,10 +1,11 @@
+package org.ciyam.at;
+
 import static org.junit.Assert.*;
 
 import org.ciyam.at.ExecutionException;
 import org.ciyam.at.OpCode;
+import org.ciyam.at.test.ExecutableTest;
 import org.junit.Test;
-
-import common.ExecutableTest;
 
 public class BranchingOpCodeTests extends ExecutableTest {
 
@@ -33,6 +34,36 @@ public class BranchingOpCodeTests extends ExecutableTest {
 		assertTrue(state.getIsFinished());
 		assertFalse(state.getHadFatalError());
 		assertEquals("Data does not match", 2L, getData(1));
+	}
+
+	@Test
+	public void testOutOfBoundsForwardsBranch() throws ExecutionException {
+		int forwardAddr = codeByteBuffer.limit() - 60; // enough room for post-jump code
+
+		codeByteBuffer.put(OpCode.JMP_ADR.value).putInt(forwardAddr);
+
+		codeByteBuffer.position(forwardAddr);
+
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(0L);
+		codeByteBuffer.put(OpCode.BZR_DAT.value).putInt(0).put((byte) 80); // way after end
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1L);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.getHadFatalError());
+	}
+
+	@Test
+	public void testOutOfBoundsBackwardsBranch() throws ExecutionException {
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(0).putLong(0L);
+		codeByteBuffer.put(OpCode.BZR_DAT.value).putInt(0).put((byte) -80); // way before start
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(1).putLong(1L);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.getHadFatalError());
 	}
 
 	@Test
