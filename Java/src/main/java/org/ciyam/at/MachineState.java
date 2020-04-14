@@ -603,6 +603,24 @@ public class MachineState {
 		return state;
 	}
 
+	/** Returns data bytes from saved state to allow external analysis, e.g. confirming expected payouts, etc. */
+	public static byte[] extractDataBytes(AtLoggerFactory loggerFactory, byte[] stateBytes) {
+		ByteBuffer byteBuffer = ByteBuffer.wrap(stateBytes);
+
+		byte[] headerBytes = new byte[HEADER_LENGTH];
+		byteBuffer.get(headerBytes);
+
+		MachineState state = new MachineState(headerBytes, null, loggerFactory);
+
+		// Extract data bytes
+		int dataBytesLength = state.dataByteBuffer.capacity();
+		byte[] dataBytes = new byte[dataBytesLength];
+		// More efficient than ByteBuffer.get()
+		System.arraycopy(stateBytes, byteBuffer.position(), dataBytes, 0, dataBytesLength);
+
+		return dataBytes;
+	}
+
 	/** Class for pushing/popping boolean flags onto/from an int */
 	private static class Flags {
 		private int flags;
