@@ -131,15 +131,15 @@ public class HashingFunctionCodeTests extends ExecutableTest {
 		int numLongs = (expected.length() + 15) / 16;
 
 		for (int longIndex = 0; longIndex < numLongs; ++longIndex) {
-			final int endIndex = expected.length() - (numLongs - longIndex - 1) * 16;
-			final int beginIndex = Math.max(0, endIndex - 16);
+			final int beginIndex = longIndex * 16;
+			final int endIndex = Math.min(expected.length(), beginIndex + 16);
 
 			String hexChars = expected.substring(beginIndex, endIndex);
 
 			codeByteBuffer.put(OpCode.SET_VAL.value);
 			codeByteBuffer.putInt(0); // addr 0
-			codeByteBuffer.put(new byte[8 - hexChars.length() / 2]); // pad LSB with zeros
 			codeByteBuffer.put(hexToBytes(hexChars));
+			codeByteBuffer.put(new byte[8 - hexChars.length() / 2]); // pad LSB with zeros
 
 			final FunctionCode bSettingFunction = bSettingFunctions[longIndex];
 			codeByteBuffer.put(OpCode.EXT_FUN_DAT.value).putShort(bSettingFunction.value).putInt(0);

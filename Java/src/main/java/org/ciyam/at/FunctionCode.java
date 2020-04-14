@@ -593,9 +593,9 @@ public enum FunctionCode {
 
 				ByteBuffer digestByteBuffer = ByteBuffer.wrap(digest);
 
-				state.b1 = (long) digestByteBuffer.getInt() & 0xffffffffL;
+				state.b1 = digestByteBuffer.getLong();
 				state.b2 = digestByteBuffer.getLong();
-				state.b3 = digestByteBuffer.getLong();
+				state.b3 = ((long) digestByteBuffer.getInt()) << 32; // MSB of B3
 				state.b4 = 0L;
 			} catch (NoSuchAlgorithmException e) {
 				throw new ExecutionException("No RIPEMD160 message digest service available", e);
@@ -619,9 +619,9 @@ public enum FunctionCode {
 
 				ByteBuffer digestByteBuffer = ByteBuffer.allocate(digester.getDigestLength());
 
-				digestByteBuffer.putInt((int) (state.b1 & 0xffffffffL));
+				digestByteBuffer.putLong(state.b1);
 				digestByteBuffer.putLong(state.b2);
-				digestByteBuffer.putLong(state.b3);
+				digestByteBuffer.putInt((int) (state.b3 >>> 32)); // MSB of B3
 				// NOTE: b4 ignored
 
 				byte[] expectedDigest = digestByteBuffer.array();
@@ -713,9 +713,9 @@ public enum FunctionCode {
 
 				ByteBuffer digestByteBuffer = ByteBuffer.wrap(rmd160Digest);
 
-				state.b1 = (long) digestByteBuffer.getInt() & 0xffffffffL;
+				state.b1 = digestByteBuffer.getLong();
 				state.b2 = digestByteBuffer.getLong();
-				state.b3 = digestByteBuffer.getLong();
+				state.b3 = ((long) digestByteBuffer.getInt()) << 32; // MSB of B3
 				state.b4 = 0L;
 			} catch (NoSuchAlgorithmException e) {
 				throw new ExecutionException("No SHA-256 or RIPEMD160 message digest service available", e);
@@ -742,9 +742,9 @@ public enum FunctionCode {
 
 				ByteBuffer digestByteBuffer = ByteBuffer.allocate(rmd160Digester.getDigestLength());
 
-				digestByteBuffer.putInt((int) (state.b1 & 0xffffffffL));
+				digestByteBuffer.putLong(state.b1);
 				digestByteBuffer.putLong(state.b2);
-				digestByteBuffer.putLong(state.b3);
+				digestByteBuffer.putInt((int) (state.b3 >>> 32)); // MSB of B3
 				// NOTE: b4 ignored
 
 				byte[] expectedDigest = digestByteBuffer.array();
