@@ -31,8 +31,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		Timestamp blockTimestamp = new Timestamp(getData(0));
 		assertEquals("Block timestamp incorrect", TestAPI.DEFAULT_INITIAL_BLOCK_HEIGHT, blockTimestamp.blockHeight);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -55,7 +55,7 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		blockTimestamp = new Timestamp(getData(0));
 		assertEquals("Block timestamp incorrect", expectedBlockHeight, blockTimestamp.blockHeight);
 
-		assertFalse(state.getHadFatalError());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -69,8 +69,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		Timestamp blockTimestamp = new Timestamp(getData(0));
 		assertEquals("Block timestamp incorrect", TestAPI.DEFAULT_AT_CREATION_BLOCK_HEIGHT, blockTimestamp.blockHeight);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -86,8 +86,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		Timestamp blockTimestamp = new Timestamp(getData(0));
 		assertEquals("Block timestamp incorrect", expectedBlockHeight, blockTimestamp.blockHeight);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -104,8 +104,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		byte[] aBytes = api.getA(state);
 		assertTrue("Block hash mismatch", Arrays.equals(expectedBlockHash, aBytes));
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -141,8 +141,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		Timestamp txTimestamp = new Timestamp(transaction.timestamp);
 		assertEquals("Transaction hash mismatch", currentBlockHeight, txTimestamp.blockHeight);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -188,8 +188,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		long transactionsCount = getData(2);
 		assertEquals("Transaction count incorrect", expectedTransactionsCount, transactionsCount);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -235,8 +235,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		long messageTxType = getData(2);
 		assertEquals("Message tx type mismatch", messageTx.txType.value, messageTxType);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -282,8 +282,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		long messageTxAmount = getData(2);
 		assertEquals("Message tx amount mismatch", messageTx.amount, messageTxAmount);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -299,8 +299,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		execute(false);
 
 		assertNotEquals("Random wasn't generated", 0L, getData(1));
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -358,8 +358,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		getDataBytes(8, actualMessage);
 		assertTrue("Message tx message mismatch", Arrays.equals(expectedMessage, actualMessage));
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -402,8 +402,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		String actualSender = TestAPI.decodeAddress(actualSenderBytes);
 		assertEquals("Sender address string mismatch", expectedSender, actualSender);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -428,8 +428,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		String actualAtCreator = TestAPI.decodeAddress(actualAtCreatorBytes);
 		assertEquals("AT creator address string mismatch", expectedAtCreator, actualAtCreator);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -468,8 +468,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 
 		assertEquals("Final 'current balance' mismatch", expectedBalance, getData(3));
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -492,7 +492,7 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 
 		assertEquals("Final 'previous balance' mismatch", expectedBalance, getData(1));
 
-		assertFalse(state.getHadFatalError());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -531,7 +531,7 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		actualBalance = recipient.balance;
 		assertEquals("Final recipient balance mismatch", expectedBalance, actualBalance);
 
-		assertFalse(state.getHadFatalError());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -574,7 +574,7 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		actualBalance = recipient.balance;
 		assertEquals("Final recipient balance mismatch", expectedBalance, actualBalance);
 
-		assertFalse(state.getHadFatalError());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -613,7 +613,7 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		actualBalance = recipient.balance;
 		assertEquals("Final recipient balance mismatch", expectedBalance, actualBalance);
 
-		assertFalse(state.getHadFatalError());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -652,7 +652,7 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		actualBalance = recipient.balance;
 		assertEquals("Final recipient balance mismatch", expectedBalance, actualBalance);
 
-		assertFalse(state.getHadFatalError());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -700,7 +700,7 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		actualBalance = recipient.balance;
 		assertEquals("Final recipient balance mismatch", expectedBalance, actualBalance);
 
-		assertFalse(state.getHadFatalError());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -744,8 +744,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		byte[] actualMessage = recipient.messages.get(0);
 		assertTrue("Recipient message incorrect", Arrays.equals(message, actualMessage));
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -769,8 +769,8 @@ public class BlockchainFunctionCodeTests extends ExecutableTest {
 		long actualTimestamp = getData(2);
 		assertEquals("Expected timestamp incorrect", expectedTimestamp, actualTimestamp);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 }

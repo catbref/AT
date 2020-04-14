@@ -22,8 +22,8 @@ public class MiscTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", testValue, getData(0));
 	}
 
@@ -33,8 +33,8 @@ public class MiscTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class MiscTests extends ExecutableTest {
 		for (long i = 0; i < minRounds; ++i)
 			execute(true);
 
-		assertTrue(state.getIsFrozen());
+		assertTrue(state.isFrozen());
 
 		Long frozenBalance = state.getFrozenBalance();
 		assertNotNull(frozenBalance);
@@ -64,7 +64,7 @@ public class MiscTests extends ExecutableTest {
 
 		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
 
-		assertTrue(state.getIsFrozen());
+		assertTrue(state.isFrozen());
 		assertEquals((Long) (minActivationAmount - 1L), state.getFrozenBalance());
 	}
 

@@ -89,8 +89,8 @@ public class HashingFunctionCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue("MachineState isn't in finished state", state.getIsFinished());
-		assertFalse("MachineState encountered fatal error", state.getHadFatalError());
+		assertTrue("MachineState isn't in finished state", state.isFinished());
+		assertFalse("MachineState encountered fatal error", state.hadFatalError());
 		assertEquals(hashName + " hashes do not match", 1L, getData(1));
 	}
 
@@ -118,8 +118,8 @@ public class HashingFunctionCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue("MachineState isn't in finished state", state.getIsFinished());
-		assertFalse("MachineState encountered fatal error", state.getHadFatalError());
+		assertTrue("MachineState isn't in finished state", state.isFinished());
+		assertFalse("MachineState encountered fatal error", state.hadFatalError());
 		assertEquals(hashName + " hashes do not match", 1L, getData(1));
 	}
 

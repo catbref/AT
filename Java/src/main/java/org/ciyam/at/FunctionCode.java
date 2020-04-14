@@ -854,7 +854,7 @@ public enum FunctionCode {
 			functionData.returnValue = state.getAPI().generateRandomUsingTransactionInA(state);
 
 			// If API set isSleeping then rewind program counter (actually codeByteBuffer) ready for being awoken
-			if (state.getIsSleeping()) {
+			if (state.isSleeping()) {
 				// EXT_FUN_RET(1) + our function code(2) + address(4)
 				state.rewindCodePosition(MachineState.OPCODE_SIZE + MachineState.FUNCTIONCODE_SIZE + MachineState.ADDRESS_SIZE);
 

@@ -46,8 +46,8 @@ public class FunctionCodeTests extends ExecutableTest {
 		getDataBytes(destAddress, dest);
 		assertTrue("Data wasn't copied correctly", Arrays.equals(TEST_BYTES, dest));
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -57,8 +57,8 @@ public class FunctionCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -69,8 +69,8 @@ public class FunctionCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -81,8 +81,8 @@ public class FunctionCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 }

@@ -273,7 +273,7 @@ public class MachineState {
 		this.onErrorAddress = address;
 	}
 
-	public boolean getIsSleeping() {
+	public boolean isSleeping() {
 		return this.isSleeping;
 	}
 
@@ -289,7 +289,7 @@ public class MachineState {
 		this.sleepUntilHeight = height;
 	}
 
-	public boolean getIsStopped() {
+	public boolean isStopped() {
 		return this.isStopped;
 	}
 
@@ -297,7 +297,7 @@ public class MachineState {
 		this.isStopped = isStopped;
 	}
 
-	public boolean getIsFrozen() {
+	public boolean isFrozen() {
 		return this.isFrozen;
 	}
 
@@ -313,7 +313,7 @@ public class MachineState {
 		this.frozenBalance = frozenBalance;
 	}
 
-	public boolean getIsFinished() {
+	public boolean isFinished() {
 		return this.isFinished;
 	}
 
@@ -321,7 +321,7 @@ public class MachineState {
 		this.isFinished = isFinished;
 	}
 
-	public boolean getHadFatalError() {
+	public boolean hadFatalError() {
 		return this.hadFatalError;
 	}
 

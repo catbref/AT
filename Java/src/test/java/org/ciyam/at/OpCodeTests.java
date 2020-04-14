@@ -17,8 +17,8 @@ public class OpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 
 		// Check data unchanged
 		for (int i = 0; i < 0x0020; ++i)
@@ -39,8 +39,8 @@ public class OpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(0));
 	}
 
@@ -54,9 +54,9 @@ public class OpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsSleeping());
-		assertFalse(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isSleeping());
+		assertFalse(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Sleep-until block height incorrect", blockHeight, getData(0));
 	}
 
@@ -68,9 +68,9 @@ public class OpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getIsSleeping());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.isSleeping());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -81,9 +81,9 @@ public class OpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertFalse(state.getIsFinished());
-		assertTrue(state.getIsSleeping());
-		assertFalse(state.getHadFatalError());
+		assertFalse(state.isFinished());
+		assertTrue(state.isSleeping());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -96,9 +96,9 @@ public class OpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsStopped());
-		assertFalse(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isStopped());
+		assertFalse(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Program counter incorrect", stopAddress, state.getProgramCounter());
 	}
 
@@ -111,9 +111,9 @@ public class OpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertFalse(state.getIsStopped());
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertFalse(state.isStopped());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -123,9 +123,9 @@ public class OpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getIsStopped());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.isStopped());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -138,9 +138,9 @@ public class OpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsStopped());
-		assertFalse(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isStopped());
+		assertFalse(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Program counter incorrect", stopAddress, state.getProgramCounter());
 	}
 
@@ -153,16 +153,16 @@ public class OpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsSleeping());
-		assertFalse(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isSleeping());
+		assertFalse(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Program counter incorrect", postSleepAddress, state.getProgramCounter());
 
 		execute(true);
 
-		assertFalse(state.getIsSleeping());
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertFalse(state.isSleeping());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Program counter incorrect", postFinishAddress, state.getProgramCounter());
 	}
 
@@ -186,8 +186,8 @@ public class OpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Error flag not set", 1L, getData(2));
 	}
 
@@ -204,8 +204,8 @@ public class OpCodeTests extends ExecutableTest {
 		execute(true);
 
 		assertEquals(expectedStopAddress, state.getOnStopAddress());
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	@Test
@@ -219,8 +219,8 @@ public class OpCodeTests extends ExecutableTest {
 		execute(true);
 
 		assertEquals(expectedStopAddress, state.getOnStopAddress());
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 }

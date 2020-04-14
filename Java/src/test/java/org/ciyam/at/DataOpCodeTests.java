@@ -16,8 +16,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2222L, getData(2));
 	}
 
@@ -29,8 +29,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -41,8 +41,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2222L, getData(1));
 	}
 
@@ -54,8 +54,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that trying to use an address outside data segment throws a fatal error. */
@@ -66,8 +66,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -78,8 +78,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 
 		// Check data all zero
 		for (int i = 0; i < 0x0020; ++i)
@@ -94,8 +94,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -106,8 +106,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2222L + 1L, getData(2));
 	}
 
@@ -119,8 +119,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that incrementing maximum unsigned long value overflows back to zero correctly. */
@@ -132,8 +132,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 0L, getData(2));
 	}
 
@@ -145,8 +145,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2222L - 1L, getData(2));
 	}
 
@@ -157,8 +157,8 @@ public class DataOpCodeTests extends ExecutableTest {
 		codeByteBuffer.put(OpCode.FIN_IMD.value);
 
 		execute(true);
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that decrementing zero long value underflows back to maximum unsigned long correctly. */
@@ -170,8 +170,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 0xffffffffffffffffL, getData(2));
 	}
 
@@ -184,8 +184,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2222L + 3333L, getData(2));
 	}
 
@@ -197,8 +197,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that trying to use an address outside data segment throws a fatal error. */
@@ -209,8 +209,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that adding to an unsigned long value overflows correctly. */
@@ -223,8 +223,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 0x0000000000000098L, getData(2));
 	}
 
@@ -237,8 +237,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 3333L - 2222L, getData(3));
 	}
 
@@ -251,8 +251,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", (3333L * 2222L), getData(3));
 	}
 
@@ -265,8 +265,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", (3333L / 2222L), getData(3));
 	}
 
@@ -280,8 +280,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check divide-by-zero is non-fatal because error handler is set. */
@@ -304,8 +304,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Error flag not set", 1L, getData(1));
 	}
 
@@ -318,8 +318,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", (3333L | 2222L), getData(3));
 	}
 
@@ -332,8 +332,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", (3333L & 2222L), getData(3));
 	}
 
@@ -346,8 +346,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", (3333L ^ 2222L), getData(3));
 	}
 
@@ -359,8 +359,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", ~2222L, getData(2));
 	}
 
@@ -380,8 +380,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 3333L, getData(6));
 	}
 
@@ -400,8 +400,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that trying to use an address outside data segment throws a fatal error. */
@@ -419,8 +419,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -438,8 +438,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 4444L, getData(0));
 	}
 
@@ -459,8 +459,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that trying to use an address outside data segment throws a fatal error. */
@@ -479,8 +479,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that trying to use an address outside data segment throws a fatal error. */
@@ -499,8 +499,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that trying to use an address outside data segment throws a fatal error. */
@@ -519,8 +519,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -537,8 +537,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 5555L, getData(3));
 	}
 
@@ -557,8 +557,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that trying to use an address outside data segment throws a fatal error. */
@@ -576,8 +576,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -595,8 +595,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 5555L, getData(4));
 	}
 
@@ -616,8 +616,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that trying to use an address outside data segment throws a fatal error. */
@@ -636,8 +636,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that trying to use an address outside data segment throws a fatal error. */
@@ -656,8 +656,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check that trying to use an address outside data segment throws a fatal error. */
@@ -676,8 +676,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -689,8 +689,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2222L % 3333L, getData(2));
 	}
 
@@ -704,8 +704,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	/** Check divide-by-zero is non-fatal because error handler is set. */
@@ -728,8 +728,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Error flag not set", 1L, getData(1));
 	}
 
@@ -742,8 +742,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2222L << 3, getData(2));
 	}
 
@@ -756,8 +756,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 0L, getData(2));
 	}
 
@@ -770,8 +770,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2222L >>> 3, getData(2));
 	}
 
@@ -784,8 +784,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 0L, getData(2));
 	}
 
@@ -798,8 +798,8 @@ public class DataOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", -1L >>> 3, getData(2));
 		assertTrue("Sign does not match", getData(2) >= 0);
 	}

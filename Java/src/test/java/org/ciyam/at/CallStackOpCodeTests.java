@@ -25,8 +25,8 @@ public class CallStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 
 		int expectedCallStackPosition = (state.numCallStackPages - 1) * MachineState.ADDRESS_SIZE;
 		assertEquals("Call stack pointer incorrect", expectedCallStackPosition, getCallStackPosition());
@@ -59,8 +59,8 @@ public class CallStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 
 		int expectedCallStackPosition = (state.numCallStackPages - 1 - 1) * MachineState.ADDRESS_SIZE;
 		assertEquals("Call stack pointer incorrect", expectedCallStackPosition, getCallStackPosition());
@@ -83,8 +83,8 @@ public class CallStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -103,8 +103,8 @@ public class CallStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 
 		int expectedCallStackPosition = (state.numCallStackPages - 1 + 1) * MachineState.ADDRESS_SIZE;
 		assertEquals("Call stack pointer incorrect", expectedCallStackPosition, getCallStackPosition());
@@ -140,8 +140,8 @@ public class CallStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 
 		int expectedCallStackPosition = (state.numCallStackPages - 1 - 1 + 1 + 1) * MachineState.ADDRESS_SIZE;
 		assertEquals("Call stack pointer incorrect", expectedCallStackPosition, getCallStackPosition());
@@ -161,8 +161,8 @@ public class CallStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -175,8 +175,8 @@ public class CallStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 }

@@ -79,18 +79,18 @@ public abstract class ExecutableTest {
 			System.out.println(String.format("Stop Address: 0x%04x", state.getOnStopAddress()));
 			System.out.println("Error Address: " + (state.getOnErrorAddress() == null ? "not set" : String.format("0x%04x", state.getOnErrorAddress())));
 
-			if (state.getIsSleeping())
+			if (state.isSleeping())
 				System.out.println("Sleeping until current block height (" + state.getCurrentBlockHeight() + ") reaches " + state.getSleepUntilHeight());
 			else
-				System.out.println("Sleeping: " + state.getIsSleeping());
+				System.out.println("Sleeping: " + state.isSleeping());
 
-			System.out.println("Stopped: " + state.getIsStopped());
-			System.out.println("Finished: " + state.getIsFinished());
+			System.out.println("Stopped: " + state.isStopped());
+			System.out.println("Finished: " + state.isFinished());
 
-			if (state.getHadFatalError())
+			if (state.hadFatalError())
 				System.out.println("Finished due to fatal error!");
 
-			System.out.println("Frozen: " + state.getIsFrozen());
+			System.out.println("Frozen: " + state.isFrozen());
 
 			long newBalance = state.getCurrentBalance();
 			System.out.println("New balance: " + TestAPI.prettyAmount(newBalance));
@@ -101,7 +101,7 @@ public abstract class ExecutableTest {
 
 			packedState = state.toBytes();
 			System.out.println("Execution round finished\n");
-		} while (!onceOnly && !state.getIsFinished());
+		} while (!onceOnly && !state.isFinished());
 
 		unwrapState(state);
 	}

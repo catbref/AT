@@ -46,8 +46,8 @@ public class SerializationTests extends ExecutableTest {
 		simulate();
 
 		assertEquals(expectedStopAddress, (int) state.getOnStopAddress());
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 	}
 
 	/** Test serialization of state with data pushed onto user stack. */
@@ -78,8 +78,8 @@ public class SerializationTests extends ExecutableTest {
 		byte[] savedState = simulate();
 
 		assertEquals(expectedStopAddress, (int) state.getOnStopAddress());
-		assertTrue(state.getIsStopped());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isStopped());
+		assertFalse(state.hadFatalError());
 
 		// Just after first STP_IMD we expect address 0 to be initialValue + increment
 		long expectedValue = initialValue + increment;

@@ -31,8 +31,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(1));
 	}
 
@@ -51,7 +51,7 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -63,7 +63,7 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -83,8 +83,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(1));
 	}
 
@@ -105,8 +105,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 1L, getData(1));
 	}
 
@@ -127,8 +127,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(1));
 	}
 
@@ -149,8 +149,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 1L, getData(1));
 	}
 
@@ -172,8 +172,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(2));
 	}
 
@@ -195,8 +195,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 1L, getData(2));
 	}
 
@@ -218,8 +218,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(2));
 	}
 
@@ -241,8 +241,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 1L, getData(2));
 	}
 
@@ -264,8 +264,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(2));
 	}
 
@@ -287,8 +287,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(2));
 	}
 
@@ -310,8 +310,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 1L, getData(2));
 	}
 
@@ -333,8 +333,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(2));
 	}
 
@@ -356,8 +356,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(2));
 	}
 
@@ -379,8 +379,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 1L, getData(2));
 	}
 
@@ -402,8 +402,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(2));
 	}
 
@@ -425,8 +425,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 1L, getData(2));
 	}
 
@@ -448,8 +448,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 2L, getData(2));
 	}
 
@@ -471,8 +471,8 @@ public class BranchingOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Data does not match", 1L, getData(2));
 	}
 

@@ -18,8 +18,8 @@ public class UserStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 
 		int expectedUserStackPosition = (state.numUserStackPages - 1) * MachineState.VALUE_SIZE;
 		assertEquals("User stack pointer incorrect", expectedUserStackPosition, getUserStackPosition());
@@ -36,8 +36,8 @@ public class UserStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 
 		int expectedUserStackPosition = (state.numUserStackPages - 2) * MachineState.VALUE_SIZE;
 		assertEquals("User stack pointer incorrect", expectedUserStackPosition, getUserStackPosition());
@@ -55,8 +55,8 @@ public class UserStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -79,8 +79,8 @@ public class UserStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 		assertEquals("Error flag not set", 1L, getData(1));
 	}
 
@@ -93,8 +93,8 @@ public class UserStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 
 		int expectedUserStackPosition = (state.numUserStackPages - 1 + 1) * MachineState.VALUE_SIZE;
 		assertEquals("User stack pointer incorrect", expectedUserStackPosition, getUserStackPosition());
@@ -115,8 +115,8 @@ public class UserStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertFalse(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
 
 		int expectedUserStackPosition = (state.numUserStackPages - 1 - 1 + 1 + 1) * MachineState.VALUE_SIZE;
 		assertEquals("User stack pointer incorrect", expectedUserStackPosition, getUserStackPosition());
@@ -131,8 +131,8 @@ public class UserStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 	@Test
@@ -145,8 +145,8 @@ public class UserStackOpCodeTests extends ExecutableTest {
 
 		execute(true);
 
-		assertTrue(state.getIsFinished());
-		assertTrue(state.getHadFatalError());
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
 	}
 
 }
