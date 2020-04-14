@@ -1,8 +1,9 @@
 package org.ciyam.at.test;
 
-import org.ciyam.at.LoggerInterface;
+import org.ciyam.at.AtLogger;
 
-public class TestLogger implements LoggerInterface {
+public class TestLogger implements AtLogger {
+
 	@Override
 	public void error(String message) {
 		System.err.println("ERROR: " + message);

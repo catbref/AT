@@ -102,12 +102,12 @@ public class SerializationTests extends ExecutableTest {
 		byte[] codeBytes = codeByteBuffer.array();
 		byte[] dataBytes = dataByteBuffer.array();
 
-		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
+		state = new MachineState(api, loggerFactory, headerBytes, codeBytes, dataBytes);
 		packedState = state.toBytes();
 
 		byte[] creationBytes = MachineState.toCreationBytes(TestUtils.VERSION, codeBytes, dataBytes, TestUtils.NUM_CALL_STACK_PAGES, TestUtils.NUM_USER_STACK_PAGES, TestUtils.MIN_ACTIVATION_AMOUNT);
 
-		MachineState restoredState = new MachineState(api, creationBytes);
+		MachineState restoredState = new MachineState(api, loggerFactory, creationBytes);
 		byte[] packedRestoredSate = restoredState.toBytes();
 
 		assertTrue(Arrays.equals(packedState, packedRestoredSate));
@@ -118,14 +118,14 @@ public class SerializationTests extends ExecutableTest {
 		byte[] codeBytes = codeByteBuffer.array();
 		byte[] dataBytes = new byte[0];
 
-		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
+		state = new MachineState(api, loggerFactory, headerBytes, codeBytes, dataBytes);
 
 		return executeAndCheck(state);
 	}
 
 	private byte[] continueSimulation(byte[] savedState) {
 		byte[] codeBytes = codeByteBuffer.array();
-		state = MachineState.fromBytes(api, logger, savedState, codeBytes);
+		state = MachineState.fromBytes(api, loggerFactory, savedState, codeBytes);
 
 		// Pretend we're on next block
 		api.bumpCurrentBlockHeight();
@@ -141,7 +141,7 @@ public class SerializationTests extends ExecutableTest {
 		byte[] codeBytes = state.getCodeBytes();
 
 		// Rebuild new MachineState using fetched state & bytes
-		MachineState restoredState = MachineState.fromBytes(api, logger, stateBytes, codeBytes);
+		MachineState restoredState = MachineState.fromBytes(api, loggerFactory, stateBytes, codeBytes);
 		// Extract rebuilt state and code bytes
 		byte[] restoredStateBytes = restoredState.toBytes();
 		byte[] restoredCodeBytes = state.getCodeBytes();

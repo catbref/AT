@@ -14,7 +14,7 @@ public abstract class ExecutableTest {
 	private static final int DATA_OFFSET = MachineState.HEADER_LENGTH; // code bytes are not present
 	private static final int CALL_STACK_OFFSET = DATA_OFFSET + TestUtils.NUM_DATA_PAGES * MachineState.VALUE_SIZE;
 
-	public TestLogger logger;
+	public TestLoggerFactory loggerFactory;
 	public TestAPI api;
 	public MachineState state;
 	public ByteBuffer codeByteBuffer;
@@ -32,7 +32,7 @@ public abstract class ExecutableTest {
 
 	@Before
 	public void beforeTest() {
-		logger = new TestLogger();
+		loggerFactory = new TestLoggerFactory();
 		api = new TestAPI();
 		codeByteBuffer = ByteBuffer.allocate(TestUtils.NUM_CODE_PAGES * MachineState.OPCODE_SIZE);
 		dataByteBuffer = ByteBuffer.allocate(TestUtils.NUM_DATA_PAGES * MachineState.VALUE_SIZE);
@@ -47,7 +47,7 @@ public abstract class ExecutableTest {
 		codeByteBuffer = null;
 		dataByteBuffer = null;
 		api = null;
-		logger = null;
+		loggerFactory = null;
 	}
 
 	protected void execute(boolean onceOnly) {
@@ -58,12 +58,12 @@ public abstract class ExecutableTest {
 		if (packedState == null) {
 			// First time
 			System.out.println("First execution - deploying...");
-			state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
+			state = new MachineState(api, loggerFactory, headerBytes, codeBytes, dataBytes);
 			packedState = state.toBytes();
 		}
 
 		do {
-			state = MachineState.fromBytes(api, logger, packedState, codeBytes);
+			state = MachineState.fromBytes(api, loggerFactory, packedState, codeBytes);
 
 			System.out.println("Starting execution round!");
 			System.out.println("Current block height: " + api.getCurrentBlockHeight());

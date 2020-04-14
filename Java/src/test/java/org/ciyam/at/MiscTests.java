@@ -62,7 +62,7 @@ public class MiscTests extends ExecutableTest {
 		byte[] codeBytes = codeByteBuffer.array();
 		byte[] dataBytes = new byte[0];
 
-		state = new MachineState(api, logger, headerBytes, codeBytes, dataBytes);
+		state = new MachineState(api, loggerFactory, headerBytes, codeBytes, dataBytes);
 
 		assertTrue(state.isFrozen());
 		assertEquals((Long) (minActivationAmount - 1L), state.getFrozenBalance());

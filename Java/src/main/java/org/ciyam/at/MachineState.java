@@ -126,7 +126,8 @@ public class MachineState {
 	private boolean isFirstOpCodeAfterSleeping;
 
 	private API api;
-	private LoggerInterface logger;
+	private AtLoggerFactory loggerFactory;
+	private AtLogger logger;
 
 	// NOTE: These are package-scope to allow easy access/operations in Opcode/FunctionCode.
 	/* package */ ByteBuffer codeByteBuffer;
@@ -137,7 +138,7 @@ public class MachineState {
 	// Constructors
 
 	/** For internal use when recreating a machine state */
-	private MachineState(API api, LoggerInterface logger, byte[] headerBytes) {
+	private MachineState(byte[] headerBytes, API api, AtLoggerFactory loggerFactory) {
 		if (headerBytes.length != HEADER_LENGTH)
 			throw new IllegalArgumentException("headerBytes length " + headerBytes.length + " incorrect, expected " + HEADER_LENGTH);
 
@@ -190,12 +191,13 @@ public class MachineState {
 		this.currentBalance = 0;
 		this.previousBalance = 0;
 		this.steps = 0;
-		this.logger = logger;
+		this.loggerFactory = loggerFactory;
+		this.logger = loggerFactory.create(MachineState.class);
 	}
 
 	/** For creating a new machine state */
-	public MachineState(API api, byte[] creationBytes) {
-		this(api, null, Arrays.copyOfRange(creationBytes, 0, HEADER_LENGTH));
+	public MachineState(API api, AtLoggerFactory loggerFactory, byte[] creationBytes) {
+		this(Arrays.copyOfRange(creationBytes, 0, HEADER_LENGTH), api, loggerFactory);
 
 		int expectedLength = HEADER_LENGTH + this.numCodePages * this.constants.CODE_PAGE_SIZE + this.numDataPages * this.constants.DATA_PAGE_SIZE;
 		if (creationBytes.length != expectedLength)
@@ -210,8 +212,8 @@ public class MachineState {
 	}
 
 	/** For creating a new machine state - used in tests */
-	public MachineState(API api, LoggerInterface logger, byte[] headerBytes, byte[] codeBytes, byte[] dataBytes) {
-		this(api, logger, headerBytes);
+	public MachineState(API api, AtLoggerFactory loggerFactory, byte[] headerBytes, byte[] codeBytes, byte[] dataBytes) {
+		this(headerBytes, api, loggerFactory);
 
 		if (codeBytes.length > this.numCodePages * this.constants.CODE_PAGE_SIZE)
 			throw new IllegalArgumentException("Number of code pages too small to hold code bytes");
@@ -342,7 +344,11 @@ public class MachineState {
 		return this.api;
 	}
 
-	public LoggerInterface getLogger() {
+	public AtLoggerFactory getLoggerFactory() {
+		return this.loggerFactory;
+	}
+
+	/* package */ AtLogger getLogger() {
 		return this.logger;
 	}
 
@@ -516,13 +522,13 @@ public class MachineState {
 	}
 
 	/** For restoring a previously serialized machine state */
-	public static MachineState fromBytes(API api, LoggerInterface logger, byte[] bytes, byte[] codeBytes) {
+	public static MachineState fromBytes(API api, AtLoggerFactory loggerFactory, byte[] bytes, byte[] codeBytes) {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 
 		byte[] headerBytes = new byte[HEADER_LENGTH];
 		byteBuffer.get(headerBytes);
 
-		MachineState state = new MachineState(api, logger, headerBytes);
+		MachineState state = new MachineState(headerBytes, api, loggerFactory);
 
 		if (codeBytes.length != state.codeByteBuffer.capacity())
 			throw new IllegalStateException("Passed codeBytes does not match length in header");
