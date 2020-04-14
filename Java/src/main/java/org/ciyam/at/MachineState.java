@@ -522,8 +522,8 @@ public class MachineState {
 	}
 
 	/** For restoring a previously serialized machine state */
-	public static MachineState fromBytes(API api, AtLoggerFactory loggerFactory, byte[] bytes, byte[] codeBytes) {
-		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+	public static MachineState fromBytes(API api, AtLoggerFactory loggerFactory, byte[] stateBytes, byte[] codeBytes) {
+		ByteBuffer byteBuffer = ByteBuffer.wrap(stateBytes);
 
 		byte[] headerBytes = new byte[HEADER_LENGTH];
 		byteBuffer.get(headerBytes);
@@ -533,27 +533,29 @@ public class MachineState {
 		if (codeBytes.length != state.codeByteBuffer.capacity())
 			throw new IllegalStateException("Passed codeBytes does not match length in header");
 
+		// Pull in code bytes
 		System.arraycopy(codeBytes, 0, state.codeByteBuffer.array(), 0, codeBytes.length);
 
-		byte[] dataBytes = new byte[state.dataByteBuffer.capacity()];
-		byteBuffer.get(dataBytes);
-		System.arraycopy(dataBytes, 0, state.dataByteBuffer.array(), 0, dataBytes.length);
+		// Pull in data bytes
+		int dataBytesLength = state.dataByteBuffer.capacity();
+		System.arraycopy(stateBytes, byteBuffer.position(), state.dataByteBuffer.array(), 0, dataBytesLength);
+		byteBuffer.position(byteBuffer.position() + dataBytesLength);
 
+		// Pull in call stack
 		int callStackLength = byteBuffer.getInt();
-		byte[] callStackBytes = new byte[callStackLength];
-		byteBuffer.get(callStackBytes);
 		// Restore call stack pointer, and useful for copy below
 		state.callStackByteBuffer.position(state.callStackByteBuffer.limit() - callStackLength);
 		// Call stack grows downwards so copy to end
-		System.arraycopy(callStackBytes, 0, state.callStackByteBuffer.array(), state.callStackByteBuffer.position(), callStackLength);
+		System.arraycopy(stateBytes, byteBuffer.position(), state.callStackByteBuffer.array(), state.callStackByteBuffer.position(), callStackLength);
+		byteBuffer.position(byteBuffer.position() + callStackLength);
 
+		// Pull in user stack
 		int userStackLength = byteBuffer.getInt();
-		byte[] userStackBytes = new byte[userStackLength];
-		byteBuffer.get(userStackBytes);
 		// Restore user stack pointer, and useful for copy below
 		state.userStackByteBuffer.position(state.userStackByteBuffer.limit() - userStackLength);
 		// User stack grows downwards so copy to end
-		System.arraycopy(userStackBytes, 0, state.userStackByteBuffer.array(), state.userStackByteBuffer.position(), userStackLength);
+		System.arraycopy(stateBytes, byteBuffer.position(), state.userStackByteBuffer.array(), state.userStackByteBuffer.position(), userStackLength);
+		byteBuffer.position(byteBuffer.position() + userStackLength);
 
 		// Actual state
 		state.programCounter = byteBuffer.getInt();
