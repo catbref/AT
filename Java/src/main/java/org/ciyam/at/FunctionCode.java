@@ -1083,7 +1083,7 @@ public enum FunctionCode {
 		checkDataAddress(state, functionData.value1, 1);
 
 		// Validate data length in arg2
-		if (functionData.value2 < 0L || functionData.value2 > state.numDataPages || functionData.value1 + byteLengthToDataLength(functionData.value2) > state.numDataPages)
+		if (functionData.value2 < 0L || functionData.value2 > Integer.MAX_VALUE || functionData.value1 + byteLengthToDataLength(functionData.value2) > state.numDataPages)
 			throw new ExecutionException(this.name() + " data length invalid");
 
 		final int dataStart = (int) (functionData.value1 & Integer.MAX_VALUE);
