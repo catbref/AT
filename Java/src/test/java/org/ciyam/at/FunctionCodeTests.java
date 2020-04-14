@@ -51,6 +51,37 @@ public class FunctionCodeTests extends ExecutableTest {
 	}
 
 	@Test
+	public void testIncorrectFunctionCodeOldStyle() throws ExecutionException {
+		// SET_B_IND should be EXT_FUN_DAT not EXT_FUN_RET
+		codeByteBuffer.put(OpCode.EXT_FUN_RET.value).putShort(FunctionCode.SET_B_IND.value).putInt(0);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.isFinished());
+		assertTrue(state.hadFatalError());
+	}
+
+	@Test
+	public void testIncorrectFunctionCodeNewStyle() throws ExecutionException {
+		try {
+			// SET_B_IND should be EXT_FUN_DAT not EXT_FUN_RET
+			codeByteBuffer.put(OpCode.EXT_FUN_RET.compile(FunctionCode.SET_B_IND, 0));
+			codeByteBuffer.put(OpCode.FIN_IMD.compile());
+
+			execute(true);
+
+			assertTrue(state.isFinished());
+			assertTrue(state.hadFatalError());
+		} catch (CompilationException e) {
+			// Expected behaviour!
+			return;
+		}
+
+		fail("Compilation was expected to fail as EXT_FUN_RET is incorrect for SET_B_IND");
+	}
+
+	@Test
 	public void testInvalidFunctionCode() throws ExecutionException {
 		codeByteBuffer.put(OpCode.EXT_FUN.value).putShort((short) 0xaaaa);
 		codeByteBuffer.put(OpCode.FIN_IMD.value);

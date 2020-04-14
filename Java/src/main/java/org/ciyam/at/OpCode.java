@@ -674,15 +674,23 @@ public enum OpCode {
 	 */
 	EXT_FUN(0x32, OpCodeParam.FUNC) {
 		@Override
-		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+		protected void preExecuteCheck(Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 
 			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
 
 			if (functionCode == null)
-				throw new IllegalFunctionCodeException("Unknown function code 0x" + String.format("%04x", rawFunctionCode) + " encountered at EXT_FUN");
+				throw new IllegalFunctionCodeException(String.format("Unknown function code 0x%04x encountered at %s",
+						rawFunctionCode, this.name()));
 
-			functionCode.preExecuteCheck(0, false, state, rawFunctionCode);
+			functionCode.preExecuteCheck(0, false);
+		}
+
+		@Override
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+			short rawFunctionCode = (short) args[0];
+
+			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
 
 			FunctionData functionData = new FunctionData(false);
 
@@ -696,17 +704,24 @@ public enum OpCode {
 	 */
 	EXT_FUN_DAT(0x33, OpCodeParam.FUNC, OpCodeParam.SRC_ADDR) {
 		@Override
+		protected void preExecuteCheck(Object... args) throws ExecutionException {
+			short rawFunctionCode = (short) args[0];
+
+			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
+
+			if (functionCode == null)
+				throw new IllegalFunctionCodeException(String.format("Unknown function code 0x%04x encountered at %s",
+						rawFunctionCode, this.name()));
+
+			functionCode.preExecuteCheck(1, false);
+		}
+
+		@Override
 		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 			int address = (int) args[1];
 
 			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
-
-			if (functionCode == null)
-				throw new IllegalFunctionCodeException("Unknown function code 0x" + String.format("%04x", rawFunctionCode) + " encountered at EXT_FUN_DAT");
-
-			functionCode.preExecuteCheck(1, false, state, rawFunctionCode);
-
 			long value = state.dataByteBuffer.getLong(address);
 
 			FunctionData functionData = new FunctionData(value, false);
@@ -721,18 +736,25 @@ public enum OpCode {
 	 */
 	EXT_FUN_DAT_2(0x34, OpCodeParam.FUNC, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
+		protected void preExecuteCheck(Object... args) throws ExecutionException {
+			short rawFunctionCode = (short) args[0];
+
+			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
+
+			if (functionCode == null)
+				throw new IllegalFunctionCodeException(String.format("Unknown function code 0x%04x encountered at %s",
+						rawFunctionCode, this.name()));
+
+			functionCode.preExecuteCheck(2, false);
+		}
+
+		@Override
 		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 			int address1 = (int) args[1];
 			int address2 = (int) args[2];
 
 			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
-
-			if (functionCode == null)
-				throw new IllegalFunctionCodeException("Unknown function code 0x" + String.format("%04x", rawFunctionCode) + " encountered at EXT_FUN_DAT_2");
-
-			functionCode.preExecuteCheck(2, false, state, rawFunctionCode);
-
 			long value1 = state.dataByteBuffer.getLong(address1);
 			long value2 = state.dataByteBuffer.getLong(address2);
 
@@ -748,16 +770,24 @@ public enum OpCode {
 	 */
 	EXT_FUN_RET(0x35, OpCodeParam.FUNC, OpCodeParam.DEST_ADDR) {
 		@Override
+		protected void preExecuteCheck(Object... args) throws ExecutionException {
+			short rawFunctionCode = (short) args[0];
+
+			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
+
+			if (functionCode == null)
+				throw new IllegalFunctionCodeException(String.format("Unknown function code 0x%04x encountered at %s",
+						rawFunctionCode, this.name()));
+
+			functionCode.preExecuteCheck(0, true);
+		}
+
+		@Override
 		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 			int address = (int) args[1];
 
 			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
-
-			if (functionCode == null)
-				throw new IllegalFunctionCodeException("Unknown function code 0x" + String.format("%04x", rawFunctionCode) + " encountered at EXT_FUN_RET");
-
-			functionCode.preExecuteCheck(0, true, state, rawFunctionCode);
 
 			FunctionData functionData = new FunctionData(true);
 
@@ -776,18 +806,25 @@ public enum OpCode {
 	 */
 	EXT_FUN_RET_DAT(0x36, OpCodeParam.FUNC, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
+		protected void preExecuteCheck(Object... args) throws ExecutionException {
+			short rawFunctionCode = (short) args[0];
+
+			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
+
+			if (functionCode == null)
+				throw new IllegalFunctionCodeException(String.format("Unknown function code 0x%04x encountered at %s",
+						rawFunctionCode, this.name()));
+
+			functionCode.preExecuteCheck(1, true);
+		}
+
+		@Override
 		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 			int address1 = (int) args[1];
 			int address2 = (int) args[2];
 
 			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
-
-			if (functionCode == null)
-				throw new IllegalFunctionCodeException("Unknown function code 0x" + String.format("%04x", rawFunctionCode) + " encountered at EXT_FUN_RET_DAT");
-
-			functionCode.preExecuteCheck(1, true, state, rawFunctionCode);
-
 			long value = state.dataByteBuffer.getLong(address2);
 
 			FunctionData functionData = new FunctionData(value, true);
@@ -807,6 +844,19 @@ public enum OpCode {
 	 */
 	EXT_FUN_RET_DAT_2(0x37, OpCodeParam.FUNC, OpCodeParam.DEST_ADDR, OpCodeParam.SRC_ADDR, OpCodeParam.SRC_ADDR) {
 		@Override
+		protected void preExecuteCheck(Object... args) throws ExecutionException {
+			short rawFunctionCode = (short) args[0];
+
+			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
+
+			if (functionCode == null)
+				throw new IllegalFunctionCodeException(String.format("Unknown function code 0x%04x encountered at %s",
+						rawFunctionCode, this.name()));
+
+			functionCode.preExecuteCheck(2, true);
+		}
+
+		@Override
 		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
 			short rawFunctionCode = (short) args[0];
 			int address1 = (int) args[1];
@@ -814,13 +864,6 @@ public enum OpCode {
 			int address3 = (int) args[3];
 
 			FunctionCode functionCode = FunctionCode.valueOf(rawFunctionCode);
-
-			if (functionCode == null)
-				throw new IllegalFunctionCodeException(
-						"Unknown function code 0x" + String.format("%04x", rawFunctionCode) + " encountered at EXT_FUN_RET_DAT_2");
-
-			functionCode.preExecuteCheck(2, true, state, rawFunctionCode);
-
 			long value1 = state.dataByteBuffer.getLong(address2);
 			long value2 = state.dataByteBuffer.getLong(address3);
 
@@ -869,13 +912,21 @@ public enum OpCode {
 	 */
 	protected abstract void executeWithParams(MachineState state, Object... args) throws ExecutionException;
 
+	protected void preExecuteCheck(Object... args) throws ExecutionException {
+		/* Can be overridden on a per-opcode basis */
+	}
+
 	/* package */ void execute(MachineState state) throws ExecutionException {
 		List<Object> args = new ArrayList<>();
 
 		for (OpCodeParam param : this.params)
 			args.add(param.fetch(state.codeByteBuffer, state.dataByteBuffer));
 
-		this.executeWithParams(state, args.toArray());
+		Object[] argsArray = args.toArray();
+
+		preExecuteCheck(argsArray);
+
+		this.executeWithParams(state, argsArray);
 	}
 
 	public static int calcOffset(ByteBuffer byteBuffer, Integer branchTarget) {
@@ -895,9 +946,9 @@ public enum OpCode {
 
 		for (int i = 0; i < this.params.length; ++i)
 			try {
-				byteBuffer.put(this.params[i].compile(args[i]));
+				byteBuffer.put(this.params[i].compile(this, args[i]));
 			} catch (ClassCastException e) {
-				throw new CompilationException(String.format("%s arg[%d] could not coerced to required type", this.name(), i));
+				throw new CompilationException(String.format("%s arg[%d] could not coerced to required type: %s", this.name(), i, e.getMessage()));
 			}
 
 		byteBuffer.flip();

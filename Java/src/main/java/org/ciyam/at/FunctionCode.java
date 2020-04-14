@@ -1003,12 +1003,15 @@ public enum FunctionCode {
 	 */
 	API_PASSTHROUGH(0x0500, 0, false) {
 		@Override
-		public void preExecuteCheck(int paramCount, boolean returnValueExpected, MachineState state, short rawFunctionCode) throws ExecutionException {
-			state.getAPI().platformSpecificPreExecuteCheck(paramCount, returnValueExpected, state, rawFunctionCode);
+		public void preExecuteCheck(int paramCount, boolean returnValueExpected) throws ExecutionException {
+			// We don't know so skip checks at this point
 		}
 
 		@Override
 		protected void postCheckExecute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
+			// XXX somehow we need to call something like this:
+			// state.getAPI().platformSpecificPreExecuteCheck(functionData.paramCount, functionData.returnValueExpected, rawFunctionCode);
+
 			state.getAPI().platformSpecificPostCheckExecute(functionData, state, rawFunctionCode);
 		}
 	};
@@ -1034,7 +1037,7 @@ public enum FunctionCode {
 		return map.get((short) value);
 	}
 
-	public void preExecuteCheck(int paramCount, boolean returnValueExpected, MachineState state, short rawFunctionCode) throws ExecutionException {
+	public void preExecuteCheck(int paramCount, boolean returnValueExpected) throws ExecutionException {
 		if (paramCount != this.paramCount)
 			throw new IllegalFunctionCodeException(
 					"Passed paramCount (" + paramCount + ") does not match function's required paramCount (" + this.paramCount + ")");
@@ -1057,7 +1060,7 @@ public enum FunctionCode {
 	 */
 	public void execute(FunctionData functionData, MachineState state, short rawFunctionCode) throws ExecutionException {
 		// Check passed functionData against requirements of this function
-		preExecuteCheck(functionData.paramCount, functionData.returnValueExpected, state, rawFunctionCode);
+		preExecuteCheck(functionData.paramCount, functionData.returnValueExpected);
 
 		if (functionData.paramCount >= 1 && functionData.value1 == null)
 			throw new IllegalFunctionCodeException("Passed value1 is null but function has paramCount of (" + this.paramCount + ")");

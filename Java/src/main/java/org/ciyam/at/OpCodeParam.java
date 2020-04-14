@@ -1,7 +1,6 @@
 package org.ciyam.at;
 
 import java.nio.ByteBuffer;
-import java.util.function.Function;
 
 enum OpCodeParam {
 
@@ -148,60 +147,68 @@ enum OpCodeParam {
 		}
 	};
 
-	private final Function<? super Object, byte[]> compiler;
+	@FunctionalInterface
+	private interface Compiler {
+		byte[] compile(OpCode opCode, Object arg);
+	}
+	private final Compiler compiler;
 
-	private OpCodeParam(Function<? super Object, byte[]> compiler) {
+	private OpCodeParam(Compiler compiler) {
 		this.compiler = compiler;
 	}
 
 	public abstract Object fetch(ByteBuffer codeByteBuffer, ByteBuffer dataByteBuffer) throws ExecutionException;
 
-	private static byte[] compileByte(Object o) {
+	private static byte[] compileByte(OpCode opcode, Object arg) {
 		// Highly likely to be an Integer, so try that first
 		try {
-			int intValue = (int) o;
+			int intValue = (int) arg;
 			if (intValue < Byte.MIN_VALUE || intValue > Byte.MAX_VALUE)
 				throw new ClassCastException("Value too large to compile to byte");
 
 			return new byte[] { (byte) intValue };
 		} catch (ClassCastException e) {
 			// Try again using Byte
-			return new byte[] { (byte) o };
+			return new byte[] { (byte) arg };
 		}
 	}
 
-	private static byte[] compileShort(Object o) {
-		short s = (short) o;
+	private static byte[] compileShort(OpCode opcode, Object arg) {
+		short s = (short) arg;
 		return new byte[] { (byte) (s >>> 8), (byte) (s) };
 	}
 
-	private static byte[] compileInt(Object o) {
-		return MachineState.toByteArray((int) o);
+	private static byte[] compileInt(OpCode opcode, Object arg) {
+		return MachineState.toByteArray((int) arg);
 	}
 
-	private static byte[] compileLong(Object o) {
+	private static byte[] compileLong(OpCode opcode, Object arg) {
 		// Highly likely to be a Long, so try that first
 		try {
-			return MachineState.toByteArray((long) o);
+			return MachineState.toByteArray((long) arg);
 		} catch (ClassCastException e) {
 			// Try again using Integer
-			return MachineState.toByteArray((long)(int) o);
+			return MachineState.toByteArray((long)(int) arg);
 		}
 	}
 
-	private static byte[] compileFunc(Object o) {
+	private static byte[] compileFunc(OpCode opcode, Object arg) {
 		try {
-			FunctionCode func = (FunctionCode) o;
-			return compileShort(func.value);
+			FunctionCode func = (FunctionCode) arg;
+			opcode.preExecuteCheck(func.value);
+			return compileShort(opcode, func.value);
 		} catch (ClassCastException e) {
 			// Couldn't cast to FunctionCode,
 			// but try Short in case caller is using API-PASSTHROUGH range
-			return compileShort(o);
+			return compileShort(opcode, arg);
+		} catch (ExecutionException e) {
+			// Wrong opcode for this function
+			throw new ClassCastException("Wrong opcode for this function");
 		}
 	}
 
-	protected byte[] compile(Object arg) {
-		return this.compiler.apply(arg);
+	protected byte[] compile(OpCode opcode, Object arg) {
+		return this.compiler.compile(opcode, arg);
 	}
 
 	public String disassemble(ByteBuffer codeByteBuffer, ByteBuffer dataByteBuffer, int postOpcodeProgramCounter) throws ExecutionException {

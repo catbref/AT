@@ -155,15 +155,18 @@ public class CompileTests {
 		final int addrHashPart2 = addrCounter++;
 		final int addrHashPart3 = addrCounter++;
 		final int addrHashPart4 = addrCounter++;
+		final int addrHashIndex = addrCounter++;
 		final int addrAddressPart1 = addrCounter++;
 		final int addrAddressPart2 = addrCounter++;
 		final int addrAddressPart3 = addrCounter++;
 		final int addrAddressPart4 = addrCounter++;
+		final int addrAddressIndex = addrCounter++;
 		final int addrRefundMinutes = addrCounter++;
 		final int addrHashTempIndex = addrCounter++;
 		final int addrHashTempLength = addrCounter++;
 		final int addrInitialPayoutAmount = addrCounter++;
 		final int addrExpectedTxType = addrCounter++;
+		final int addrAddressTempIndex = addrCounter++;
 		// Variables
 		final int addrRefundTimestamp = addrCounter++;
 		final int addrLastTimestamp = addrCounter++;
@@ -195,7 +198,7 @@ public class CompileTests {
 			codeByteBuffer.put(OpCode.EXT_FUN_RET_DAT_2.compile(FunctionCode.ADD_MINUTES_TO_TIMESTAMP, addrRefundTimestamp, addrLastTimestamp, addrRefundMinutes));
 
 			// Load recipient's address into B register
-			codeByteBuffer.put(OpCode.EXT_FUN_DAT.compile(FunctionCode.SET_B_IND, addrAddressPart1));
+			codeByteBuffer.put(OpCode.EXT_FUN_DAT.compile(FunctionCode.SET_B_IND, addrAddressIndex));
 			// Send initial payment to recipient so they have enough funds to message AT if all goes well
 			codeByteBuffer.put(OpCode.EXT_FUN_DAT.compile(FunctionCode.PAY_TO_ADDRESS_IN_B, addrInitialPayoutAmount));
 
@@ -237,8 +240,8 @@ public class CompileTests {
 
 			// Extract sender address from transaction into B register
 			codeByteBuffer.put(OpCode.EXT_FUN.compile(FunctionCode.PUT_ADDRESS_FROM_TX_IN_A_INTO_B));
-			// Save B register into data segment starting at addrAddressTemp1
-			codeByteBuffer.put(OpCode.EXT_FUN_RET.compile(FunctionCode.GET_B_IND, addrAddressTemp1));
+			// Save B register into data segment starting at addrAddressTemp1 (as pointed to by addrAddressTempIndex)
+			codeByteBuffer.put(OpCode.EXT_FUN_DAT.compile(FunctionCode.GET_B_IND, addrAddressTempIndex));
 			// Compare each part of transaction's sender's address with expected address. If they don't match, look for another transaction.
 			codeByteBuffer.put(OpCode.BNE_DAT.compile(addrAddressTemp1, addrAddressPart1, calcOffset(codeByteBuffer, labelTxLoop)));
 			codeByteBuffer.put(OpCode.BNE_DAT.compile(addrAddressTemp2, addrAddressPart2, calcOffset(codeByteBuffer, labelTxLoop)));
@@ -249,10 +252,10 @@ public class CompileTests {
 
 			// Extract message from transaction into B register
 			codeByteBuffer.put(OpCode.EXT_FUN.compile(FunctionCode.PUT_MESSAGE_FROM_TX_IN_A_INTO_B));
-			// Save B register into data segment starting at addrHashTemp1
-			codeByteBuffer.put(OpCode.EXT_FUN_RET.compile(FunctionCode.GET_B_IND, addrHashTemp1));
-			// Load B register with expected hash result
-			codeByteBuffer.put(OpCode.EXT_FUN_DAT.compile(FunctionCode.SET_B_IND, addrHashPart1));
+			// Save B register into data segment starting at addrHashTemp1 (as pointed to by addrHashTempIndex)
+			codeByteBuffer.put(OpCode.EXT_FUN_DAT.compile(FunctionCode.GET_B_IND, addrHashTempIndex));
+			// Load B register with expected hash result (as pointed to by addrHashIndex)
+			codeByteBuffer.put(OpCode.EXT_FUN_DAT.compile(FunctionCode.SET_B_IND, addrHashIndex));
 			// Perform HASH160 using source data at addrHashTemp1 through addrHashTemp4. (Location and length specified via addrHashTempIndex and addrHashTemplength).
 			// Save the equality result (1 if they match, 0 otherwise) into addrComparator.
 			codeByteBuffer.put(OpCode.EXT_FUN_RET_DAT_2.compile(FunctionCode.CHECK_HASH160_WITH_B, addrComparator, addrHashTempIndex, addrHashTempLength));
@@ -261,8 +264,8 @@ public class CompileTests {
 
 			/* Success! Pay balance to intended recipient */
 
-			// Load B register with intended recipient address.
-			codeByteBuffer.put(OpCode.EXT_FUN_DAT.compile(FunctionCode.SET_B_IND, addrAddressPart1));
+			// Load B register with intended recipient address (as pointed to by addrAddressIndex)
+			codeByteBuffer.put(OpCode.EXT_FUN_DAT.compile(FunctionCode.SET_B_IND, addrAddressIndex));
 			// Pay AT's balance to recipient
 			codeByteBuffer.put(OpCode.EXT_FUN.compile(FunctionCode.PAY_ALL_TO_ADDRESS_IN_B));
 			// We're finished forever
