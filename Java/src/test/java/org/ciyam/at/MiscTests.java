@@ -68,4 +68,18 @@ public class MiscTests extends ExecutableTest {
 		assertEquals((Long) (minActivationAmount - 1L), state.getFrozenBalance());
 	}
 
+	@Test
+	public void testDataAddressBounds() throws ExecutionException {
+		// Last possible valid address in data segment
+		int lastDataAddress = (dataByteBuffer.limit() / MachineState.VALUE_SIZE) - 1;
+
+		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(lastDataAddress).putLong(8888L);
+		codeByteBuffer.put(OpCode.FIN_IMD.value);
+
+		execute(true);
+
+		assertTrue(state.isFinished());
+		assertFalse(state.hadFatalError());
+	}
+
 }

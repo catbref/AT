@@ -71,7 +71,7 @@ interface Utils {
 		try {
 			final int address = codeByteBuffer.getInt() * MachineState.VALUE_SIZE;
 
-			if (address < 0 || address + MachineState.VALUE_SIZE >= dataByteBuffer.limit())
+			if (address < 0 || address + MachineState.VALUE_SIZE > dataByteBuffer.limit())
 				throw new InvalidAddressException("Data address out of bounds");
 
 			return address;
