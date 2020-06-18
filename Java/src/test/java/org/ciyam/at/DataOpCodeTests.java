@@ -10,30 +10,6 @@ import org.junit.Test;
 public class DataOpCodeTests extends ExecutableTest {
 
 	@Test
-	public void testSET_VAL() throws ExecutionException {
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(2222L);
-		codeByteBuffer.put(OpCode.FIN_IMD.value);
-
-		execute(true);
-
-		assertTrue(state.isFinished());
-		assertFalse(state.hadFatalError());
-		assertEquals("Data does not match", 2222L, getData(2));
-	}
-
-	/** Check that trying to use an address outside data segment throws a fatal error. */
-	@Test
-	public void testSET_VALunbounded() throws ExecutionException {
-		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(9999).putLong(2222L);
-		codeByteBuffer.put(OpCode.FIN_IMD.value);
-
-		execute(true);
-
-		assertTrue(state.isFinished());
-		assertTrue(state.hadFatalError());
-	}
-
-	@Test
 	public void testSET_DAT() throws ExecutionException {
 		codeByteBuffer.put(OpCode.SET_VAL.value).putInt(2).putLong(2222L);
 		codeByteBuffer.put(OpCode.SET_DAT.value).putInt(1).putInt(2);

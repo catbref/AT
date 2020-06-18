@@ -876,6 +876,55 @@ public enum OpCode {
 
 			state.dataByteBuffer.putLong(address1, functionData.returnValue);
 		}
+	},
+	/**
+	 * <b>ADD</b> <b>VAL</b>ue<br>
+	 * <tt>0x46 addr1 value</tt><br>
+	 * <tt>@addr1 += value</tt>
+	 */
+	ADD_VAL(0x46, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
+		@Override
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+			executeValueOperation(state, (a, b) -> a + b, args);
+		}
+	},
+	/**
+	 * <b>SUB</b>tract <b>VAL</b>ue<br>
+	 * <tt>0x07 addr1 value</tt><br>
+	 * <tt>@addr1 -= value</tt>
+	 */
+	SUB_VAL(0x47, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
+		@Override
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+			executeValueOperation(state, (a, b) -> a - b, args);
+		}
+	},
+	/**
+	 * <b>MUL</b>tiply <b>VAL</b>ue<br>
+	 * <tt>0x08 addr1 value</tt><br>
+	 * <tt>@addr1 *= value</tt>
+	 */
+	MUL_VAL(0x48, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
+		@Override
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+			executeValueOperation(state, (a, b) -> a * b, args);
+		}
+	},
+	/**
+	 * <b>DIV</b>ide <b>VAL</b>ue<br>
+	 * <tt>0x09 addr1 value</tt><br>
+	 * <tt>@addr1 /= value</tt>
+	 * Can also throw <tt>IllegealOperationException</tt> if divide-by-zero attempted.
+	 */
+	DIV_VAL(0x49, OpCodeParam.DEST_ADDR, OpCodeParam.VALUE) {
+		@Override
+		protected void executeWithParams(MachineState state, Object... args) throws ExecutionException {
+			try {
+				executeValueOperation(state, (a, b) -> a / b, args);
+			} catch (ArithmeticException e) {
+				throw new IllegalOperationException("Divide by zero", e);
+			}
+		}
 	};
 
 	public final byte value;
@@ -995,6 +1044,26 @@ public enum OpCode {
 
 		long value1 = state.dataByteBuffer.getLong(address1);
 		long value2 = state.dataByteBuffer.getLong(address2);
+
+		long newValue = operator.apply(value1, value2);
+
+		state.dataByteBuffer.putLong(address1, newValue);
+	}
+
+	/**
+	 * Common code for ADD_VAL/SUB_VAL/MUL_VAL/DIV_VAL/MOD_VAL/SHL_VAL/SHR_VAL
+	 * 
+	 * @param codeByteBuffer
+	 * @param dataByteBuffer
+	 * @param operator
+	 *            - typically a lambda operating on two <tt>long</tt> params, e.g. <tt>(a, b) -> a + b</tt>
+	 * @throws ExecutionException
+	 */
+	protected void executeValueOperation(MachineState state, TwoValueOperator operator, Object... args) throws ExecutionException {
+		int address1 = (int) args[0];
+
+		long value1 = state.dataByteBuffer.getLong(address1);
+		long value2 = (long) args[1];
 
 		long newValue = operator.apply(value1, value2);
 
