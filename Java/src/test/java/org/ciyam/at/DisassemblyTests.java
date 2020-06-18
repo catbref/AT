@@ -6,10 +6,6 @@ import static org.junit.Assert.fail;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
-import org.ciyam.at.ExecutionException;
-import org.ciyam.at.FunctionCode;
-import org.ciyam.at.MachineState;
-import org.ciyam.at.OpCode;
 import org.ciyam.at.test.ExecutableTest;
 import org.ciyam.at.test.TestUtils;
 import org.junit.Test;

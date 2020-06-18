@@ -5,9 +5,6 @@ import static org.junit.Assert.*;
 
 import java.nio.charset.StandardCharsets;
 
-import org.ciyam.at.ExecutionException;
-import org.ciyam.at.FunctionCode;
-import org.ciyam.at.OpCode;
 import org.ciyam.at.test.ExecutableTest;
 import org.junit.Test;
 
