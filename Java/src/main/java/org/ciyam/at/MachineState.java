@@ -675,18 +675,17 @@ public class MachineState {
 
 		// Pre-execution checks
 		if (this.isFinished) {
-			logger.debug("Not executing as already finished!");
+			logger.debug(() -> "Not executing as already finished!");
 			return;
 		}
 
 		if (this.isFrozen && this.currentBalance <= this.frozenBalance) {
-			logger.debug("Not executing as current balance [" + this.currentBalance + "] hasn't increased since being frozen at [" + this.frozenBalance + "]");
+			logger.debug(() -> String.format("Not executing as current balance [%d] hasn't increased since being frozen at [%d]", this.currentBalance, this.frozenBalance));
 			return;
 		}
 
 		if (this.isSleeping && this.sleepUntilHeight != null && this.currentBlockHeight < this.sleepUntilHeight) {
-			logger.debug("Not executing as current block height [" + this.currentBlockHeight + "] hasn't reached sleep-until block height ["
-					+ this.sleepUntilHeight + "]");
+			logger.debug(() -> String.format("Not executing as current block height [%d] hasn't reached sleep-until block height [%d]", this.currentBlockHeight, this.sleepUntilHeight));
 			return;
 		}
 
@@ -716,21 +715,21 @@ public class MachineState {
 				if (nextOpCode == null)
 					throw new IllegalOperationException("OpCode 0x" + String.format("%02x", rawOpCode) + " not recognised");
 
-				this.logger.debug("[PC: " + String.format("%04x", this.programCounter) + "] " + nextOpCode.name());
+				this.logger.debug(() -> String.format("[PC: %04x] %s", this.programCounter, nextOpCode.name()));
 
 				// Request opcode step-fee from API, apply fee to balance, etc.
 				int opcodeSteps = this.api.getOpCodeSteps(nextOpCode);
 				long opcodeFee = opcodeSteps * feePerStep;
 
 				if (this.steps + opcodeSteps > maxSteps) {
-					logger.debug("Enforced sleep due to exceeding maximum number of steps (" + maxSteps + ") per execution round");
+					logger.debug(() -> String.format("Enforced sleep due to exceeding maximum number of steps (%d) per execution round", maxSteps));
 					this.isSleeping = true;
 					break;
 				}
 
 				if (this.currentBalance < opcodeFee) {
 					// Not enough balance left to continue execution - freeze AT
-					logger.debug("Frozen due to lack of balance");
+					logger.debug(() -> "Frozen due to lack of balance");
 					this.isFrozen = true;
 					this.frozenBalance = this.currentBalance;
 					break;
@@ -746,7 +745,7 @@ public class MachineState {
 				// Synchronize programCounter with codeByteBuffer in case of JMPs, branches, etc.
 				this.programCounter = codeByteBuffer.position();
 			} catch (ExecutionException e) {
-				this.logger.debug("Error at PC " + String.format("%04x", this.programCounter) + ": " + e.getMessage());
+				this.logger.error(() -> String.format("Error at PC %04x: %s", this.programCounter, e.getMessage()));
 
 				if (this.onErrorAddress == null) {
 					this.isFinished = true;
@@ -767,18 +766,18 @@ public class MachineState {
 
 		if (this.isSleeping) {
 			if (this.sleepUntilHeight != null)
-				this.logger.debug("Sleeping until block " + this.sleepUntilHeight);
+				this.logger.debug(() -> String.format("Sleeping until block %d", this.sleepUntilHeight));
 			else
-				this.logger.debug("Sleeping until next block");
+				this.logger.debug(() -> "Sleeping until next block");
 		}
 
 		if (this.isStopped) {
-			this.logger.debug("Setting program counter to stop address: " + String.format("%04x", this.onStopAddress));
+			this.logger.debug(() -> String.format("Setting program counter to stop address: %04x", this.onStopAddress));
 			this.programCounter = this.onStopAddress;
 		}
 
 		if (this.isFinished) {
-			this.logger.debug("Finished - refunding remaining funds back to creator");
+			this.logger.debug(() -> "Finished - refunding remaining funds back to creator");
 			this.api.onFinished(this.currentBalance, this);
 			this.currentBalance = 0;
 		}

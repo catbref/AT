@@ -1068,7 +1068,7 @@ public enum FunctionCode {
 		if (functionData.paramCount == 2 && functionData.value2 == null)
 			throw new IllegalFunctionCodeException("Passed value2 is null but function has paramCount of (" + this.paramCount + ")");
 
-		state.getLogger().debug("Function \"" + this.name() + "\"");
+		state.getLogger().debug(() -> String.format("Function \"%s\"", this.name()));
 
 		postCheckExecute(functionData, state, rawFunctionCode);
 	}
