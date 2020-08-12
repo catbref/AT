@@ -3,7 +3,6 @@ package org.ciyam.at;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,8 +63,6 @@ public class MachineState {
 	public final short numCallStackPages;
 	public final short numUserStackPages;
 	public final long minActivationAmount;
-
-	private final byte[] headerBytes;
 
 	/** Constants set in effect */
 	private final VersionedConstants constants;
@@ -137,15 +134,10 @@ public class MachineState {
 
 	// Constructors
 
-	/** For internal use when recreating a machine state */
-	private MachineState(byte[] headerBytes, API api, AtLoggerFactory loggerFactory) {
-		if (headerBytes.length != HEADER_LENGTH)
-			throw new IllegalArgumentException("headerBytes length " + headerBytes.length + " incorrect, expected " + HEADER_LENGTH);
-
-		this.headerBytes = headerBytes;
-
-		// Parsing header bytes
-		ByteBuffer byteBuffer = ByteBuffer.wrap(this.headerBytes);
+	/** For internal use when recreating a machine state. Leaves ByteBuffer position immediately after header. */
+	private MachineState(ByteBuffer byteBuffer) {
+		if (byteBuffer.remaining() < HEADER_LENGTH)
+			throw new IllegalArgumentException("ByteBuffer too small (" + byteBuffer.remaining() + "), minimum " + HEADER_LENGTH);
 
 		this.version = byteBuffer.getShort();
 		if (this.version < 1)
@@ -174,8 +166,13 @@ public class MachineState {
 			throw new IllegalArgumentException("Number of user stack pages must be >= 0");
 
 		this.minActivationAmount = byteBuffer.getLong();
+		if (this.minActivationAmount < 0)
+			throw new IllegalArgumentException("Minimum activation amount must be >= 0");
 
-		// Header OK - set up code and data buffers
+		// Header OK
+	}
+
+	private void setupSegmentsAndStacks() {
 		this.codeByteBuffer = ByteBuffer.allocate(this.numCodePages * this.constants.CODE_PAGE_SIZE);
 		this.dataByteBuffer = ByteBuffer.allocate(this.numDataPages * this.constants.DATA_PAGE_SIZE);
 
@@ -185,35 +182,29 @@ public class MachineState {
 
 		this.userStackByteBuffer = ByteBuffer.allocate(this.numUserStackPages * this.constants.USER_STACK_PAGE_SIZE);
 		this.userStackByteBuffer.position(this.userStackByteBuffer.limit()); // Downward-growing stack, so start at the end
-
-		this.api = api;
-		this.currentBlockHeight = 0;
-		this.currentBalance = 0;
-		this.previousBalance = 0;
-		this.steps = 0;
-		this.loggerFactory = loggerFactory;
-		this.logger = loggerFactory.create(MachineState.class);
 	}
 
 	/** For creating a new machine state */
 	public MachineState(API api, AtLoggerFactory loggerFactory, byte[] creationBytes) {
-		this(Arrays.copyOfRange(creationBytes, 0, HEADER_LENGTH), api, loggerFactory);
+		this(ByteBuffer.wrap(creationBytes));
 
 		int expectedLength = HEADER_LENGTH + this.numCodePages * this.constants.CODE_PAGE_SIZE + this.numDataPages * this.constants.DATA_PAGE_SIZE;
 		if (creationBytes.length != expectedLength)
 			throw new IllegalArgumentException("Creation bytes length does not match header values");
+
+		setupSegmentsAndStacks();
 
 		System.arraycopy(creationBytes, HEADER_LENGTH, this.codeByteBuffer.array(), 0, this.numCodePages * this.constants.CODE_PAGE_SIZE);
 
 		System.arraycopy(creationBytes, HEADER_LENGTH + this.numCodePages * this.constants.CODE_PAGE_SIZE, this.dataByteBuffer.array(), 0,
 				this.numDataPages * this.constants.DATA_PAGE_SIZE);
 
-		commonFinalConstruction();
+		commonFinalConstruction(api, loggerFactory);
 	}
 
 	/** For creating a new machine state - used in tests */
 	public MachineState(API api, AtLoggerFactory loggerFactory, byte[] headerBytes, byte[] codeBytes, byte[] dataBytes) {
-		this(headerBytes, api, loggerFactory);
+		this(ByteBuffer.wrap(headerBytes));
 
 		if (codeBytes.length > this.numCodePages * this.constants.CODE_PAGE_SIZE)
 			throw new IllegalArgumentException("Number of code pages too small to hold code bytes");
@@ -221,14 +212,25 @@ public class MachineState {
 		if (dataBytes.length > this.numDataPages * this.constants.DATA_PAGE_SIZE)
 			throw new IllegalArgumentException("Number of data pages too small to hold data bytes");
 
+		setupSegmentsAndStacks();
+
 		System.arraycopy(codeBytes, 0, this.codeByteBuffer.array(), 0, codeBytes.length);
 
 		System.arraycopy(dataBytes, 0, this.dataByteBuffer.array(), 0, dataBytes.length);
 
-		commonFinalConstruction();
+		commonFinalConstruction(api, loggerFactory);
 	}
 
-	private void commonFinalConstruction() {
+	private void commonFinalConstruction(API api, AtLoggerFactory loggerFactory) {
+		this.api = api;
+		this.loggerFactory = loggerFactory;
+		this.logger = loggerFactory.create(MachineState.class);
+
+		this.currentBlockHeight = 0;
+		this.currentBalance = 0;
+		this.previousBalance = 0;
+		this.steps = 0;
+
 		this.programCounter = 0;
 		this.onStopAddress = 0;
 		this.onErrorAddress = null;
@@ -443,33 +445,89 @@ public class MachineState {
 		return this.codeByteBuffer.array();
 	}
 
+	private static class NumericByteArrayOutputStream extends ByteArrayOutputStream {
+		public NumericByteArrayOutputStream(int capacity) {
+			super(capacity);
+		}
+
+		public void writeShort(short value) {
+			this.write((byte) (value >> 8));
+			this.write((byte) (value));
+		}
+
+		public void writeInt(int value) {
+			this.write((byte) (value >> 24));
+			this.write((byte) (value >> 16));
+			this.write((byte) (value >> 8));
+			this.write((byte) (value));
+		}
+
+		public void writeLong(long value) {
+			this.write((byte) (value >> 56));
+			this.write((byte) (value >> 48));
+			this.write((byte) (value >> 40));
+			this.write((byte) (value >> 32));
+			this.write((byte) (value >> 24));
+			this.write((byte) (value >> 16));
+			this.write((byte) (value >> 8));
+			this.write((byte) (value));
+		}
+	}
+
 	/** For serializing a machine state */
 	public byte[] toBytes() {
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		int capacity = HEADER_LENGTH
+				+ this.dataByteBuffer.capacity()
+				+ this.callStackByteBuffer.capacity()
+				+ this.userStackByteBuffer.capacity()
+				+ 7 * 4 // Misc ints like stack lengths, PC, PCS, flags, etc.
+				+ 10 * 8; // Misc longs like previous balance, frozen balance, A, B, etc.
+
+		NumericByteArrayOutputStream bytes = new NumericByteArrayOutputStream(capacity);
 
 		try {
 			// Header first
-			bytes.write(this.headerBytes);
+
+			// Version
+			bytes.writeShort(version);
+
+			// Reserved
+			bytes.writeShort((short) 0);
+
+			// Code length
+			bytes.writeShort(numCodePages);
+
+			// Data length
+			bytes.writeShort(numDataPages);
+
+			// Call stack length
+			bytes.writeShort(numCallStackPages);
+
+			// User stack length
+			bytes.writeShort(numUserStackPages);
+
+			// Minimum activation amount
+			bytes.writeLong(minActivationAmount);
 
 			// Data
 			bytes.write(this.dataByteBuffer.array());
 
 			// Call stack length (32bit unsigned int)
 			int callStackLength = this.callStackByteBuffer.limit() - this.callStackByteBuffer.position();
-			bytes.write(toByteArray(callStackLength));
+			bytes.writeInt(callStackLength);
 			// Call stack (only the bytes actually in use)
 			bytes.write(this.callStackByteBuffer.array(), this.callStackByteBuffer.position(), callStackLength);
 
 			// User stack length (32bit unsigned int)
 			int userStackLength = this.userStackByteBuffer.limit() - this.userStackByteBuffer.position();
-			bytes.write(toByteArray(userStackLength));
+			bytes.writeInt(userStackLength);
 			// User stack (only the bytes actually in use)
 			bytes.write(this.userStackByteBuffer.array(), this.userStackByteBuffer.position(), userStackLength);
 
 			// Actual state
-			bytes.write(toByteArray(this.programCounter));
-			bytes.write(toByteArray(this.onStopAddress));
-			bytes.write(toByteArray(this.previousBalance));
+			bytes.writeInt(this.programCounter);
+			bytes.writeInt(this.onStopAddress);
+			bytes.writeLong(this.previousBalance);
 
 			// Various flags
 			Flags flags = new Flags();
@@ -489,30 +547,30 @@ public class MachineState {
 			boolean hasNonZeroB = this.b1 != 0 || this.b2 != 0 || this.b3 != 0 || this.b4 != 0;
 			flags.push(hasNonZeroB);
 
-			bytes.write(toByteArray(flags.intValue()));
+			bytes.writeInt(flags.intValue());
 
 			// Optional flag-indicated extra info in same order as above
 			if (this.onErrorAddress != null)
-				bytes.write(toByteArray(this.onErrorAddress));
+				bytes.writeInt(this.onErrorAddress);
 
 			if (this.sleepUntilHeight != null)
-				bytes.write(toByteArray(this.sleepUntilHeight));
+				bytes.writeInt(this.sleepUntilHeight);
 
 			if (this.frozenBalance != null)
-				bytes.write(toByteArray(this.frozenBalance));
+				bytes.writeLong(this.frozenBalance);
 
 			if (hasNonZeroA) {
-				bytes.write(toByteArray(this.a1));
-				bytes.write(toByteArray(this.a2));
-				bytes.write(toByteArray(this.a3));
-				bytes.write(toByteArray(this.a4));
+				bytes.writeLong(this.a1);
+				bytes.writeLong(this.a2);
+				bytes.writeLong(this.a3);
+				bytes.writeLong(this.a4);
 			}
 
 			if (hasNonZeroB) {
-				bytes.write(toByteArray(this.b1));
-				bytes.write(toByteArray(this.b2));
-				bytes.write(toByteArray(this.b3));
-				bytes.write(toByteArray(this.b4));
+				bytes.writeLong(this.b1);
+				bytes.writeLong(this.b2);
+				bytes.writeLong(this.b3);
+				bytes.writeLong(this.b4);
 			}
 		} catch (IOException e) {
 			return null;
@@ -525,13 +583,21 @@ public class MachineState {
 	public static MachineState fromBytes(API api, AtLoggerFactory loggerFactory, byte[] stateBytes, byte[] codeBytes) {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(stateBytes);
 
-		byte[] headerBytes = new byte[HEADER_LENGTH];
-		byteBuffer.get(headerBytes);
+		MachineState state = new MachineState(byteBuffer);
 
-		MachineState state = new MachineState(headerBytes, api, loggerFactory);
-
-		if (codeBytes.length != state.codeByteBuffer.capacity())
+		if (codeBytes.length != state.numCodePages * state.constants.CODE_PAGE_SIZE)
 			throw new IllegalStateException("Passed codeBytes does not match length in header");
+
+		state.api = api;
+		state.loggerFactory = loggerFactory;
+		state.logger = loggerFactory.create(MachineState.class);
+
+		state.currentBlockHeight = 0;
+		state.currentBalance = 0;
+		state.previousBalance = 0;
+		state.steps = 0;
+
+		state.setupSegmentsAndStacks();
 
 		// Pull in code bytes
 		System.arraycopy(codeBytes, 0, state.codeByteBuffer.array(), 0, codeBytes.length);
@@ -557,6 +623,34 @@ public class MachineState {
 		System.arraycopy(stateBytes, byteBuffer.position(), state.userStackByteBuffer.array(), state.userStackByteBuffer.position(), userStackLength);
 		byteBuffer.position(byteBuffer.position() + userStackLength);
 
+		extractMisc(byteBuffer, state);
+
+		return state;
+	}
+
+	/** For restoring only flags from a previously serialized machine state */
+	public static MachineState flagsOnlyfromBytes(byte[] stateBytes) {
+		ByteBuffer byteBuffer = ByteBuffer.wrap(stateBytes);
+
+		MachineState state = new MachineState(byteBuffer);
+
+		// Skip data segment
+		byteBuffer.position(byteBuffer.position() + state.numDataPages * state.constants.DATA_PAGE_SIZE);
+
+		// Skip call stack
+		int callStackLength = byteBuffer.getInt();
+		byteBuffer.position(byteBuffer.position() + callStackLength);
+
+		// Skip user stack
+		int userStackLength = byteBuffer.getInt();
+		byteBuffer.position(byteBuffer.position() + userStackLength);
+
+		extractMisc(byteBuffer, state);
+
+		return state;
+	}
+
+	private static void extractMisc(ByteBuffer byteBuffer, MachineState state) {
 		// Actual state
 		state.programCounter = byteBuffer.getInt();
 		state.onStopAddress = byteBuffer.getInt();
@@ -599,24 +693,23 @@ public class MachineState {
 			state.b3 = byteBuffer.getLong();
 			state.b4 = byteBuffer.getLong();
 		}
-
-		return state;
 	}
 
 	/** Returns data bytes from saved state to allow external analysis, e.g. confirming expected payouts, etc. */
-	public static byte[] extractDataBytes(AtLoggerFactory loggerFactory, byte[] stateBytes) {
+	public static byte[] extractDataBytes(byte[] stateBytes) {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(stateBytes);
 
-		byte[] headerBytes = new byte[HEADER_LENGTH];
-		byteBuffer.get(headerBytes);
+		short version = byteBuffer.getShort(0);
+		VersionedConstants constants = VERSIONED_CONSTANTS.get(version);
 
-		MachineState state = new MachineState(headerBytes, null, loggerFactory);
+		short numDataPages = byteBuffer.getShort(2 /*version*/ + 2 /*reserved*/ + 2 /*code pages*/);
 
 		// Extract data bytes
-		int dataBytesLength = state.dataByteBuffer.capacity();
+		int dataBytesLength = numDataPages * constants.DATA_PAGE_SIZE;
 		byte[] dataBytes = new byte[dataBytesLength];
+
 		// More efficient than ByteBuffer.get()
-		System.arraycopy(stateBytes, byteBuffer.position(), dataBytes, 0, dataBytesLength);
+		System.arraycopy(stateBytes, HEADER_LENGTH, dataBytes, 0, dataBytesLength);
 
 		return dataBytes;
 	}
@@ -647,6 +740,11 @@ public class MachineState {
 		public int intValue() {
 			return flags;
 		}
+	}
+
+	/** Convert short to big-endian byte array */
+	public static byte[] toByteArray(short value) {
+		return new byte[] { (byte) (value >> 8), (byte) (value) };
 	}
 
 	/** Convert int to big-endian byte array */

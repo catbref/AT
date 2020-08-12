@@ -107,6 +107,8 @@ public class SerializationTests extends ExecutableTest {
 		byte[] packedRestoredSate = restoredState.toBytes();
 
 		assertTrue(Arrays.equals(packedState, packedRestoredSate));
+
+		restoredState = MachineState.fromBytes(api, loggerFactory, packedState, codeBytes);
 	}
 
 	private byte[] simulate() {
