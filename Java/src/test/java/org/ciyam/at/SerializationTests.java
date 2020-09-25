@@ -148,6 +148,14 @@ public class SerializationTests extends ExecutableTest {
 		assertTrue("Serialization->Deserialization->Reserialization error", Arrays.equals(stateBytes, restoredStateBytes));
 		assertTrue("Serialization->Deserialization->Reserialization error", Arrays.equals(codeBytes, restoredCodeBytes));
 
+		// Check reuse works too
+		byte[] dupStateBytes = new byte[stateBytes.length];
+		System.arraycopy(stateBytes, 0, dupStateBytes, 0, stateBytes.length);
+
+		restoredState.reuseFromBytes(api, dupStateBytes);
+		byte[] restoredReusedStateBytes = restoredState.toBytes();
+		assertTrue("Serialization->Deserialization->Reserialization reuse error", Arrays.equals(stateBytes, restoredReusedStateBytes));
+
 		return stateBytes;
 	}
 

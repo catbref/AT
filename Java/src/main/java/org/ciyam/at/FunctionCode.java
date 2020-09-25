@@ -1091,7 +1091,7 @@ public enum FunctionCode {
 
 		byte[] message = new byte[dataLength];
 
-		ByteBuffer messageByteBuffer = state.dataByteBuffer.slice();
+		ByteBuffer messageByteBuffer = state.dataByteBuffer.asReadOnlyBuffer();
 		messageByteBuffer.position(dataStart * MachineState.VALUE_SIZE);
 		messageByteBuffer.limit(dataStart * MachineState.VALUE_SIZE + dataLength);
 

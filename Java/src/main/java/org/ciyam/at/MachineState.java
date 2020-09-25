@@ -172,18 +172,6 @@ public class MachineState {
 		// Header OK
 	}
 
-	private void setupSegmentsAndStacks() {
-		this.codeByteBuffer = ByteBuffer.allocate(this.numCodePages * this.constants.CODE_PAGE_SIZE);
-		this.dataByteBuffer = ByteBuffer.allocate(this.numDataPages * this.constants.DATA_PAGE_SIZE);
-
-		// Set up stacks
-		this.callStackByteBuffer = ByteBuffer.allocate(this.numCallStackPages * this.constants.CALL_STACK_PAGE_SIZE);
-		this.callStackByteBuffer.position(this.callStackByteBuffer.limit()); // Downward-growing stack, so start at the end
-
-		this.userStackByteBuffer = ByteBuffer.allocate(this.numUserStackPages * this.constants.USER_STACK_PAGE_SIZE);
-		this.userStackByteBuffer.position(this.userStackByteBuffer.limit()); // Downward-growing stack, so start at the end
-	}
-
 	/** For creating a new machine state */
 	public MachineState(API api, AtLoggerFactory loggerFactory, byte[] creationBytes) {
 		this(ByteBuffer.wrap(creationBytes));
@@ -192,12 +180,16 @@ public class MachineState {
 		if (creationBytes.length != expectedLength)
 			throw new IllegalArgumentException("Creation bytes length does not match header values");
 
-		setupSegmentsAndStacks();
+		int codeBytesLength = this.numCodePages * this.constants.CODE_PAGE_SIZE;
+		this.codeByteBuffer = ByteBuffer.allocate(codeBytesLength);
+		System.arraycopy(creationBytes, HEADER_LENGTH, this.codeByteBuffer.array(), 0, codeBytesLength);
 
-		System.arraycopy(creationBytes, HEADER_LENGTH, this.codeByteBuffer.array(), 0, this.numCodePages * this.constants.CODE_PAGE_SIZE);
-
-		System.arraycopy(creationBytes, HEADER_LENGTH + this.numCodePages * this.constants.CODE_PAGE_SIZE, this.dataByteBuffer.array(), 0,
+		// Copy initial data segment from creation bytes so that we don't modify creationBytes on execution
+		this.dataByteBuffer = ByteBuffer.allocate(this.numDataPages * this.constants.DATA_PAGE_SIZE);
+		System.arraycopy(creationBytes, HEADER_LENGTH + codeBytesLength, this.dataByteBuffer.array(), 0,
 				this.numDataPages * this.constants.DATA_PAGE_SIZE);
+
+		constructStacks();
 
 		commonFinalConstruction(api, loggerFactory);
 	}
@@ -212,13 +204,24 @@ public class MachineState {
 		if (dataBytes.length > this.numDataPages * this.constants.DATA_PAGE_SIZE)
 			throw new IllegalArgumentException("Number of data pages too small to hold data bytes");
 
-		setupSegmentsAndStacks();
+		this.codeByteBuffer = ByteBuffer.wrap(codeBytes).asReadOnlyBuffer();
 
-		System.arraycopy(codeBytes, 0, this.codeByteBuffer.array(), 0, codeBytes.length);
-
+		// Copy dataBytes so that we don't modify original during execution
+		this.dataByteBuffer = ByteBuffer.allocate(this.numDataPages * this.constants.DATA_PAGE_SIZE);
 		System.arraycopy(dataBytes, 0, this.dataByteBuffer.array(), 0, dataBytes.length);
 
+		constructStacks();
+
 		commonFinalConstruction(api, loggerFactory);
+	}
+
+	private void constructStacks() {
+		// Set up stacks
+		this.callStackByteBuffer = ByteBuffer.allocate(this.numCallStackPages * this.constants.CALL_STACK_PAGE_SIZE);
+		this.callStackByteBuffer.position(this.callStackByteBuffer.limit()); // Downward-growing stack, so start at the end
+
+		this.userStackByteBuffer = ByteBuffer.allocate(this.numUserStackPages * this.constants.USER_STACK_PAGE_SIZE);
+		this.userStackByteBuffer.position(this.userStackByteBuffer.limit()); // Downward-growing stack, so start at the end
 	}
 
 	private void commonFinalConstruction(API api, AtLoggerFactory loggerFactory) {
@@ -442,7 +445,10 @@ public class MachineState {
 
 	/** Returns code bytes only as these are read-only so no need to be duplicated in every serialized state */
 	public byte[] getCodeBytes() {
-		return this.codeByteBuffer.array();
+		// We create a copy because codeByteBuffer is a read-only sub-slice of another ByteBuffer
+		byte[] codeBytes = new byte[this.codeByteBuffer.limit()];
+		this.codeByteBuffer.position(0).get(codeBytes);
+		return codeBytes;
 	}
 
 	private static class NumericByteArrayOutputStream extends ByteArrayOutputStream {
@@ -588,7 +594,6 @@ public class MachineState {
 		if (codeBytes.length != state.numCodePages * state.constants.CODE_PAGE_SIZE)
 			throw new IllegalStateException("Passed codeBytes does not match length in header");
 
-		state.api = api;
 		state.loggerFactory = loggerFactory;
 		state.logger = loggerFactory.create(MachineState.class);
 
@@ -597,15 +602,31 @@ public class MachineState {
 		state.previousBalance = 0;
 		state.steps = 0;
 
-		state.setupSegmentsAndStacks();
+		// Ring-fence code bytes
+		state.codeByteBuffer = ByteBuffer.wrap(codeBytes).asReadOnlyBuffer();
 
-		// Pull in code bytes
-		System.arraycopy(codeBytes, 0, state.codeByteBuffer.array(), 0, codeBytes.length);
+		reuse(state, api, byteBuffer);
+
+		return state;
+	}
+
+	/** For restoring a previously serialized machine state, reusing existing instance as much as possible. */
+	public void reuseFromBytes(API api, byte[] stateBytes) {
+		ByteBuffer byteBuffer = ByteBuffer.wrap(stateBytes);
+		reuse(this, api, byteBuffer);
+	}
+
+	private static void reuse(MachineState state, API api, ByteBuffer byteBuffer) {
+		byte[] stateBytes = byteBuffer.array();
+		state.api = api;
 
 		// Pull in data bytes
-		int dataBytesLength = state.dataByteBuffer.capacity();
-		System.arraycopy(stateBytes, byteBuffer.position(), state.dataByteBuffer.array(), 0, dataBytesLength);
-		byteBuffer.position(byteBuffer.position() + dataBytesLength);
+		int dataBytesLength = state.numDataPages * state.constants.DATA_PAGE_SIZE;
+		state.dataByteBuffer = ByteBuffer.allocate(dataBytesLength);
+		System.arraycopy(stateBytes, HEADER_LENGTH, state.dataByteBuffer.array(), 0, dataBytesLength);
+		byteBuffer.position(HEADER_LENGTH + dataBytesLength);
+
+		state.constructStacks();
 
 		// Pull in call stack
 		int callStackLength = byteBuffer.getInt();
@@ -624,8 +645,6 @@ public class MachineState {
 		byteBuffer.position(byteBuffer.position() + userStackLength);
 
 		extractMisc(byteBuffer, state);
-
-		return state;
 	}
 
 	/** For restoring only flags from a previously serialized machine state */
@@ -635,7 +654,7 @@ public class MachineState {
 		MachineState state = new MachineState(byteBuffer);
 
 		// Skip data segment
-		byteBuffer.position(byteBuffer.position() + state.numDataPages * state.constants.DATA_PAGE_SIZE);
+		byteBuffer.position(HEADER_LENGTH + state.numDataPages * state.constants.DATA_PAGE_SIZE);
 
 		// Skip call stack
 		int callStackLength = byteBuffer.getInt();
