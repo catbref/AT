@@ -146,7 +146,7 @@ public abstract class API {
 		state.rewindCodePosition(offset);
 	}
 
-	protected void setSleepUntilHeight(MachineState state, int height) {
+	protected void setSleepUntilHeight(MachineState state, Integer height) {
 		state.setSleepUntilHeight(height);
 	}
 
